@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
 					   xmlns:s="library://ns.adobe.com/flex/spark" 
-					   xmlns:mx="library://ns.adobe.com/flex/mx">
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   width="860" height="600">
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
@@ -9,15 +10,101 @@
 		<![CDATA[
 			include "FacebookGraph.as";
 			
+			var beginType:Boolean = false; // toggled once when the user clicks the search box
+			
+			// dummy function for testing
+			protected function dummyLogin(event:MouseEvent):void {
+				currentState = "loggedin";
+			}
+			
+			protected function searchboxClick(event:MouseEvent):void {
+				if(!beginType) {
+					searchbox.text = "";
+					searchbox.setStyle("color", "#000000");
+					beginType = true;
+				}
+			}
 		]]>
 	</fx:Script>
 	<s:states>
 		<s:State name="loggedout"/>
 		<s:State name="loggedin"/>
 	</s:states>
-	<s:Button id="loginoutBtn" right="10" top="10" label="Log In" skinClass="skins.FBLogoutButtonSkin"
-			  label.loggedin="Log Out" click.loggedin="logout()"
-			  label.loggedout="Log In" click.loggedout="login()"
+	<s:Button id="loginoutBtn" right="10" label="Log In" skinClass="skins.FBLogoutButtonSkin" 
+			  right.loggedin="10" bottom.loggedin="10" label.loggedin="Log Out"
 			  skinClass.loggedin="skins.FBLogoutButtonSkin"
-			  skinClass.loggedout="skins.FBLoginButtonSkin"/>
+			  right.loggedout="385" top.loggedout="349" label.loggedout="Log In"
+			  click.loggedout="dummyLogin(event)" skinClass.loggedout="skins.FBLoginButtonSkin"/>
+	<s:Label x="20" y="20"
+			 color="#3B5998" fontFamily="Verdana" fontSize="36"
+			 fontWeight="bold" text="face"/>
+	<s:Label color="#666666" fontFamily="Verdana" fontSize="30" text="+"
+			 x="104" y="22"/>
+	<s:Label includeIn="loggedout" x="190" y="272" color="#888888" fontFamily="Helvetica Neue Light"
+			 fontSize="36" text="You are currently not logged in."/>
+	<s:Label includeIn="loggedout" x="363" y="379" color="#AAAAAA" fontFamily="Helvetica Neue Light"
+			 fontSize="12" text="Please login to Facebook."/>
+	<s:TextInput includeIn="loggedin" y="11" right="20" width="692" color="#DDDDDD" id="searchbox"
+				 fontFamily="Helvetica Neue Light" fontSize="32" text="Who do you want to find?" click="searchboxClick(event)"/>
+	<s:Label includeIn="loggedin" x="12" y="93" fontFamily="Helvetica Neue Light" fontSize="18"
+			 text="Filter your results"/>
+	<s:Image includeIn="loggedin" x="19" y="124" source="images/graduation-hat.png"/>
+	<s:Label includeIn="loggedin" x="37" y="124" fontFamily="Helvetica Neue Light" fontSize="14"
+			 text="Education"/>
+	<s:Image includeIn="loggedin" x="19" y="271" source="images/marker.png"/>
+	<s:Label includeIn="loggedin" x="37" y="270" fontFamily="Helvetica Neue Light" fontSize="14"
+			 text="Location"/>
+	<s:Image includeIn="loggedin" x="19" y="420" source="images/briefcase.png"/>
+	<s:Label includeIn="loggedin" x="37" y="419" fontFamily="Helvetica Neue Light" fontSize="14"
+			 text="Workplace"/>
+	<s:CheckBox includeIn="loggedin" x="37" y="149" label="Columbia"
+				fontFamily="Helvetica Neue Light"/>
+	<s:CheckBox includeIn="loggedin" x="37" y="169" label="NYU"
+				fontFamily="Helvetica Neue Light"/>
+	<s:CheckBox includeIn="loggedin" x="37" y="189" label="Brown"
+				fontFamily="Helvetica Neue Light"/>
+	<s:ComboBox includeIn="loggedin" x="38" y="216" width="105" fontFamily="Helvetica Neue Light"
+				itemRenderer="educationRenderer">
+		<mx:ArrayList>
+			<fx:String>Cornell</fx:String>
+			<fx:String>MIT</fx:String>
+			<fx:String>Harvard</fx:String>
+			<fx:String>Dartmouth</fx:String>
+			<fx:String>Penn</fx:String>
+			<fx:String>Yale</fx:String>
+			<fx:String>Princeton</fx:String>
+		</mx:ArrayList> 
+	</s:ComboBox>
+	<s:CheckBox includeIn="loggedin" x="37" y="289" label="New York, NY"
+				fontFamily="Helvetica Neue Light"/>
+	<s:CheckBox includeIn="loggedin" x="37" y="309" label="Boston, MA" fontFamily="Helvetica Neue Light"/>
+	<s:CheckBox includeIn="loggedin" x="37" y="329" label="Washington, D.C." fontFamily="Helvetica Neue Light"/>
+	<s:ComboBox includeIn="loggedin" x="38" y="356" width="105" fontFamily="Helvetica Neue Light"
+				itemRenderer="educationRenderer">
+		<mx:ArrayList>
+			<fx:String>Cornell</fx:String>
+			<fx:String>MIT</fx:String>
+			<fx:String>Harvard</fx:String>
+			<fx:String>Dartmouth</fx:String>
+			<fx:String>Penn</fx:String>
+			<fx:String>Yale</fx:String>
+			<fx:String>Princeton</fx:String>
+		</mx:ArrayList> 
+	</s:ComboBox>
+	<s:CheckBox includeIn="loggedin" x="37" y="441" label="Microsoft"
+				fontFamily="Helvetica Neue Light"/>
+	<s:CheckBox includeIn="loggedin" x="37" y="461" label="Google" fontFamily="Helvetica Neue Light"/>
+	<s:CheckBox includeIn="loggedin" x="37" y="481" label="Apple" fontFamily="Helvetica Neue Light"/>
+	<s:ComboBox includeIn="loggedin" x="38" y="508" width="105" fontFamily="Helvetica Neue Light"
+				itemRenderer="educationRenderer">
+		<mx:ArrayList>
+			<fx:String>Cornell</fx:String>
+			<fx:String>MIT</fx:String>
+			<fx:String>Harvard</fx:String>
+			<fx:String>Dartmouth</fx:String>
+			<fx:String>Penn</fx:String>
+			<fx:String>Yale</fx:String>
+			<fx:String>Princeton</fx:String>
+		</mx:ArrayList> 
+	</s:ComboBox>
 </s:WindowedApplication>
