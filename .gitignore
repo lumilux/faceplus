@@ -1,4 +1,7 @@
 .*
 !.gitignore
+!*.as
+!src/
+!src/*
 bin-debug/
 bin-debug/*

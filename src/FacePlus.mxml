@@ -8,7 +8,7 @@
 	<fx:Script>
 		<![CDATA[
 			include "FacebookGraph.as";
-
+			
 		]]>
 	</fx:Script>
 	<s:states>
