@@ -5,4 +5,18 @@
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			include "FacebookGraph.as";
+		]]>
+	</fx:Script>
+	<s:states>
+		<s:State name="loggedout"/>
+		<s:State name="loggedin"/>
+	</s:states>
+	<s:Button id="loginoutBtn" right="10" top="10" label="Log In" skinClass="skins.FBLogoutButtonSkin"
+			  label.loggedin="Log Out" click.loggedin="logout()"
+			  label.loggedout="Log In" click.loggedout="login()"
+			  skinClass.loggedin="skins.FBLogoutButtonSkin"
+			  skinClass.loggedout="skins.FBLoginButtonSkin"/>
 </s:WindowedApplication>
