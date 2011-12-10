@@ -57,7 +57,7 @@ protected function loginHandler(success:Object,fail:Object):void
 		this.currentState = "loggedin";
 		
 		//this is just a test
-		//searchUser("Jim", 0, dummySampleCallback);
+		searchUser("Jim", 0, dummySampleCallback);
 		
 	}
 }
@@ -119,6 +119,7 @@ protected function searchResultsHandler(success:Object, failure:Object):void
 		
 		//for each user id, fetch the user data by submitting a batch request
 		for(i = 0; i < ids.length; i++)
+		//for(i=0;i<5;i++);
 		{
 			
 			var getUserById:String = "/" + ids.getItemAt(i);
@@ -165,7 +166,7 @@ protected function userDataHandler(success:Object): void
 			
 		}
 		
-		trace(users.length);
+		trace("users length: "+users.length);
 		
 		//now for each id make a request to get mutuals
 		var reqMutualsBatchRequest:FacebookBatchRequest = new FacebookBatchRequest(reqMutualsBatch, mutualFriendsHandler);
@@ -183,14 +184,16 @@ protected function mutualFriendsHandler(success:Object): void
 	{
 		for( i = userListStart; i < users.length; i++)
 		{
-			trace("success.data is "+success.data);
-			trace("body is :"+success.data[i - userListStart].body);
-			trace("body.data is: "+success.data[i - userListStart].body.data);
-			users.getItemAt(i).mutuals = success.data[i - userListStart].body.data.length;
+			//if(success.data && success.data[i - userListStart] && success.data[i - userListStart].body && success.data[i - userListStart].body.data && success.data[i - userListStart].body.data.length) {
+				trace("success.data is "+success.data);
+				trace("element is "+success.data[i - userListStart]);
+				trace("body is :"+success.data[i - userListStart].body);
+				trace("body.data is: "+success.data[i - userListStart].body.data);
+				users.getItemAt(i).mutuals = success.data[i - userListStart].body.data.length;
+			//} else {
+			//	trace("something was undefined!");
+			//}
 		}
-		
-		trace(users.length);
-		trace(users.getItemAt(0).name+" "+users.getItemAt(0).mutuals);
 		
 		//the users list is completely populated at this point
 		//call the callback function
@@ -228,3 +231,6 @@ protected function logout(event:MouseEvent):void
 	this.currentState="loggedout";
 	
 }
+
+
+

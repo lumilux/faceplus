@@ -8,6 +8,7 @@
 	</fx:Declarations>
 	<fx:Script>
 		<![CDATA[
+			import spark.effects.Fade;
 			include "FacebookGraph.as";
 			
 			var beginType:Boolean = false; // toggled once when the user clicks the search box
@@ -30,8 +31,33 @@
 					spinner.visible = true;
 					searchUser(searchbox.text, 0, function() {
 						spinner.visible = false;
-						trace(users);
-					});
+						var fd:spark.effects.Fade = new Fade(filtersgroup);
+						if(filtersgroup.visible == false) {
+							fd.alphaFrom = 0;
+							fd.alphaTo = 1;
+							fd.duration = 1500;
+							fd.play();
+						}
+						
+						// loop through resultset and add configure filters
+						var locations:Array = new Array();
+	
+						trace("users! is "+users);
+						for(var i=0;i<users.length;i++) {
+							var loc = users.getItemAt(i).location;
+							trace(users.getItemAt(i).name+": "+loc+", "+users.getItemAt(i).network);
+							if(loc) {
+								if(!locations[loc]) {
+									locations[loc] = new ArrayList();
+								}
+								locations[loc].addItem(users.getItemAt(i));
+							}
+						}
+						
+						// sort locations by size of list
+						
+						
+					}); // end search user callback
 				}
 			}
 		]]>
@@ -44,7 +70,8 @@
 			  right.loggedin="10" bottom.loggedin="10" label.loggedin="Log Out"
 			  skinClass.loggedin="skins.FBLogoutButtonSkin"
 			  right.loggedout="385" top.loggedout="349" label.loggedout="Log In"
-			  click.loggedout="login(event)" skinClass.loggedout="skins.FBLoginButtonSkin"/>
+			  click.loggedout="login(event)" click.loggedin="logout(event)" 
+			  skinClass.loggedout="skins.FBLoginButtonSkin"/>
 	<s:Label x="20" y="20"
 			 color="#3B5998" fontFamily="Verdana" fontSize="36"
 			 fontWeight="bold" text="face"/>
@@ -61,65 +88,67 @@
 		<controls:Spinner id="spinner" tickColor="#cccccc" visible="false"/>
 	</mx:Box>
 	
-	<s:Label includeIn="loggedin" x="12" y="93" fontFamily="Helvetica Neue Light" fontSize="18"
-			 text="Filter your results"/>
-	<s:Image includeIn="loggedin" x="19" y="124" source="images/graduation-hat.png"/>
-	<s:Label includeIn="loggedin" x="37" y="124" fontFamily="Helvetica Neue Light" fontSize="14"
-			 text="Education"/>
-	<s:Image includeIn="loggedin" x="19" y="271" source="images/marker.png"/>
-	<s:Label includeIn="loggedin" x="37" y="270" fontFamily="Helvetica Neue Light" fontSize="14"
-			 text="Location"/>
-	<s:Image includeIn="loggedin" x="19" y="420" source="images/briefcase.png"/>
-	<s:Label includeIn="loggedin" x="37" y="419" fontFamily="Helvetica Neue Light" fontSize="14"
-			 text="Workplace"/>
-	<s:CheckBox includeIn="loggedin" x="37" y="149" label="Columbia"
-				fontFamily="Helvetica Neue Light"/>
-	<s:CheckBox includeIn="loggedin" x="37" y="169" label="NYU"
-				fontFamily="Helvetica Neue Light"/>
-	<s:CheckBox includeIn="loggedin" x="37" y="189" label="Brown"
-				fontFamily="Helvetica Neue Light"/>
-	<s:ComboBox includeIn="loggedin" x="38" y="216" width="105" fontFamily="Helvetica Neue Light"
-				itemRenderer="educationRenderer">
-		<mx:ArrayList>
-			<fx:String>Cornell</fx:String>
-			<fx:String>MIT</fx:String>
-			<fx:String>Harvard</fx:String>
-			<fx:String>Dartmouth</fx:String>
-			<fx:String>Penn</fx:String>
-			<fx:String>Yale</fx:String>
-			<fx:String>Princeton</fx:String>
-		</mx:ArrayList> 
-	</s:ComboBox>
-	<s:CheckBox includeIn="loggedin" x="37" y="289" label="New York, NY"
-				fontFamily="Helvetica Neue Light"/>
-	<s:CheckBox includeIn="loggedin" x="37" y="309" label="Boston, MA" fontFamily="Helvetica Neue Light"/>
-	<s:CheckBox includeIn="loggedin" x="37" y="329" label="Washington, D.C." fontFamily="Helvetica Neue Light"/>
-	<s:ComboBox includeIn="loggedin" x="38" y="356" width="105" fontFamily="Helvetica Neue Light"
-				itemRenderer="educationRenderer">
-		<mx:ArrayList>
-			<fx:String>Cornell</fx:String>
-			<fx:String>MIT</fx:String>
-			<fx:String>Harvard</fx:String>
-			<fx:String>Dartmouth</fx:String>
-			<fx:String>Penn</fx:String>
-			<fx:String>Yale</fx:String>
-			<fx:String>Princeton</fx:String>
-		</mx:ArrayList> 
-	</s:ComboBox>
-	<s:CheckBox includeIn="loggedin" x="37" y="441" label="Microsoft"
-				fontFamily="Helvetica Neue Light"/>
-	<s:CheckBox includeIn="loggedin" x="37" y="461" label="Google" fontFamily="Helvetica Neue Light"/>
-	<s:CheckBox includeIn="loggedin" x="37" y="481" label="Apple" fontFamily="Helvetica Neue Light"/>
-	<s:ComboBox includeIn="loggedin" x="38" y="508" width="105" fontFamily="Helvetica Neue Light"
-				itemRenderer="educationRenderer">
-		<mx:ArrayList>
-			<fx:String>Cornell</fx:String>
-			<fx:String>MIT</fx:String>
-			<fx:String>Harvard</fx:String>
-			<fx:String>Dartmouth</fx:String>
-			<fx:String>Penn</fx:String>
-			<fx:String>Yale</fx:String>
-			<fx:String>Princeton</fx:String>
-		</mx:ArrayList> 
-	</s:ComboBox>
+	<s:Group id="filtersgroup" visible="false">
+		<s:Label includeIn="loggedin" x="12" y="93" fontFamily="Helvetica Neue Light" fontSize="18"
+				 text="Filter your results"/>
+		<s:Image includeIn="loggedin" x="19" y="124" source="images/graduation-hat.png"/>
+		<s:Label includeIn="loggedin" x="37" y="124" fontFamily="Helvetica Neue Light" fontSize="14"
+				 text="Education"/>
+		<s:Image includeIn="loggedin" x="19" y="271" source="images/marker.png"/>
+		<s:Label includeIn="loggedin" x="37" y="270" fontFamily="Helvetica Neue Light" fontSize="14"
+				 text="Location"/>
+		<s:Image includeIn="loggedin" x="19" y="420" source="images/briefcase.png"/>
+		<s:Label includeIn="loggedin" x="37" y="419" fontFamily="Helvetica Neue Light" fontSize="14"
+				 text="Workplace"/>
+		<s:CheckBox includeIn="loggedin" x="37" y="149" label="Columbia"
+					fontFamily="Helvetica Neue Light"/>
+		<s:CheckBox includeIn="loggedin" x="37" y="169" label="NYU"
+					fontFamily="Helvetica Neue Light"/>
+		<s:CheckBox includeIn="loggedin" x="37" y="189" label="Brown"
+					fontFamily="Helvetica Neue Light"/>
+		<s:ComboBox includeIn="loggedin" x="38" y="216" width="105" fontFamily="Helvetica Neue Light"
+					itemRenderer="educationRenderer">
+			<mx:ArrayList>
+				<fx:String>Cornell</fx:String>
+				<fx:String>MIT</fx:String>
+				<fx:String>Harvard</fx:String>
+				<fx:String>Dartmouth</fx:String>
+				<fx:String>Penn</fx:String>
+				<fx:String>Yale</fx:String>
+				<fx:String>Princeton</fx:String>
+			</mx:ArrayList> 
+		</s:ComboBox>
+		<s:CheckBox includeIn="loggedin" x="37" y="289" label="New York, NY"
+					fontFamily="Helvetica Neue Light"/>
+		<s:CheckBox includeIn="loggedin" x="37" y="309" label="Boston, MA" fontFamily="Helvetica Neue Light"/>
+		<s:CheckBox includeIn="loggedin" x="37" y="329" label="Washington, D.C." fontFamily="Helvetica Neue Light"/>
+		<s:ComboBox includeIn="loggedin" x="38" y="356" width="105" fontFamily="Helvetica Neue Light"
+					itemRenderer="educationRenderer">
+			<mx:ArrayList>
+				<fx:String>Cornell</fx:String>
+				<fx:String>MIT</fx:String>
+				<fx:String>Harvard</fx:String>
+				<fx:String>Dartmouth</fx:String>
+				<fx:String>Penn</fx:String>
+				<fx:String>Yale</fx:String>
+				<fx:String>Princeton</fx:String>
+			</mx:ArrayList> 
+		</s:ComboBox>
+		<s:CheckBox includeIn="loggedin" x="37" y="441" label="Microsoft"
+					fontFamily="Helvetica Neue Light"/>
+		<s:CheckBox includeIn="loggedin" x="37" y="461" label="Google" fontFamily="Helvetica Neue Light"/>
+		<s:CheckBox includeIn="loggedin" x="37" y="481" label="Apple" fontFamily="Helvetica Neue Light"/>
+		<s:ComboBox includeIn="loggedin" x="38" y="508" width="105" fontFamily="Helvetica Neue Light"
+					itemRenderer="educationRenderer">
+			<mx:ArrayList>
+				<fx:String>Cornell</fx:String>
+				<fx:String>MIT</fx:String>
+				<fx:String>Harvard</fx:String>
+				<fx:String>Dartmouth</fx:String>
+				<fx:String>Penn</fx:String>
+				<fx:String>Yale</fx:String>
+				<fx:String>Princeton</fx:String>
+			</mx:ArrayList> 
+		</s:ComboBox>
+	</s:Group>
 </s:WindowedApplication>
