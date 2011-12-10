@@ -196,7 +196,7 @@ private function readEducation(userBody:Object, user:User): void
 				s.year = "";
 			}
 						
-			user.education.addItem(s);
+			userBody.education.addItem(s);
 		}		
 	}
 }
