@@ -160,7 +160,8 @@ protected function userDataHandler(success:Object): void
 			{
 				u.location = "";
 			}
-			
+						
+			readEducation(success.data[count].body, u);	//read the education json obj
 			
 			//add the new user to the list
 			users.addItem(u);
@@ -175,6 +176,31 @@ protected function userDataHandler(success:Object): void
 		
 	}
 	
+}
+
+private function readEducation(userBody:Object, user:User): void
+{
+	if(userBody.education != null)
+	{
+		var j:int;
+		for(j = 0; j < userBody.education.length; j++)
+		{
+			var s:School = new School();
+			s.name = userBody.education[j].school.name;		//school will always be there
+			s.type = userBody.education[j].type;
+						
+			if( userBody.education[j].year != null )
+			{
+				s.year = userBody.education[j].year.name;		//year may always not be there..so check if this is null
+			}
+			else
+			{
+				s.year = "";
+			}
+						
+			user.education.addItem(s);
+		}		
+	}
 }
 
 
