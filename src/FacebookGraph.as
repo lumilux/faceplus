@@ -57,7 +57,7 @@ protected function loginHandler(success:Object,fail:Object):void
 		this.currentState = "loggedin";
 		
 		//this is just a test
-		searchUser("Jim", 0, dummySampleCallback);
+		//searchUser("Jim", 0, dummySampleCallback);
 		
 	}
 }
