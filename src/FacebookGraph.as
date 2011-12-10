@@ -1,18 +1,15 @@
 
 // ActionScript file
 import com.facebook.graph.FacebookDesktop;
-
-import mx.events.*;
-import flash.events.*;
-
-import mx.collections.ArrayList;
-
-import com.facebook.graph.FacebookDesktop;
 import com.facebook.graph.data.Batch;
 import com.facebook.graph.net.FacebookBatchRequest;
 
+import flash.events.*;
+
 import mx.collections.ArrayList;
+import mx.events.*;
 import mx.events.FlexEvent;
+import User;
 
 
 public var users:ArrayList = new ArrayList();			//holds the User objects that represent search results
@@ -36,7 +33,7 @@ private var searchUserCallback:Function;				//this is the callback to be called 
 protected function windowedapplication1_creationCompleteHandler(event:FlexEvent):void
 {
 	// TODO Auto-generated method stub
-	FacebookDesktop.init("283561771688383", loginHandler);
+	FacebookDesktop.init("283561771688383");
 	
 }
 
@@ -56,10 +53,11 @@ protected function loginHandler(success:Object,fail:Object):void
 		//set the access token and the user id for future use
 		ACCESS_TOKEN = success.accessToken;
 		USER_ID = success.uid;
-		
+		trace("success!");
+		this.currentState = "loggedin";
 		
 		//this is just a test
-		searchUser("Jim", 0, dummySampleCallback);
+		//searchUser("Jim", 0, dummySampleCallback);
 		
 	}
 }
@@ -206,14 +204,19 @@ private function readEducation(userBody:Object, user:User): void
 
 protected function mutualFriendsHandler(success:Object): void
 {
+	trace("entering mutual friends");
 	if(success.data)
 	{
 		for( i = userListStart; i < users.length; i++)
 		{
+			trace("success.data is "+success.data);
+			trace("body is :"+success.data[i - userListStart].body);
+			trace("body.data is: "+success.data[i - userListStart].body.data);
 			users.getItemAt(i).mutuals = success.data[i - userListStart].body.data.length;
 		}
 		
 		trace(users.length);
+		trace(users.getItemAt(0).name+" "+users.getItemAt(0).mutuals);
 		
 		//the users list is completely populated at this point
 		//call the callback function
@@ -236,7 +239,7 @@ protected function getStatusHandler(success:Object, failure:Object):void
 	}
 }
 
-protected function login():void
+protected function login(event:MouseEvent):void
 {
 	FacebookDesktop.login(loginHandler, ["user_birthday", "read_stream",
 										 "user_location", "friends_location",
@@ -244,10 +247,10 @@ protected function login():void
 										 "user_hometown", "friends_hometown"]);
 }
 
-protected function logout():void
+protected function logout(event:MouseEvent):void
 {
 	// TODO Auto-generated method stub
 	FacebookDesktop.logout();
-	//currentState="loggedout";
+	this.currentState="loggedout";
 	
 }
