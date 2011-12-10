@@ -29,6 +29,8 @@ private var i:int;										//variable used in many loops, not a good idea to be
 private var userListStart:int;
 
 private var  reqMutualsBatch:Batch;						//this is used to store the requests to get mutuals
+private var searchUserCallback:Function;				//this is the callback to be called when the last asynchromous call completes
+														//in searchUser()
 
 
 protected function windowedapplication1_creationCompleteHandler(event:FlexEvent):void
@@ -57,11 +59,15 @@ protected function loginHandler(success:Object,fail:Object):void
 		
 		
 		//this is just a test
-		//searchUser("Jim", 0);
+		searchUser("Jim", 0, dummySampleCallback);
 		
 	}
 }
 
+public function dummySampleCallback():void
+{
+	trace(users);
+}
 
 //this method searches the facebook graph for given string (20 at a time)
 //and populates the users arraylist with Users objects
@@ -69,10 +75,10 @@ protected function loginHandler(success:Object,fail:Object):void
 //
 //This function always adds to the users list, so to get the previous results just traverse back up the users list
 //
-//usage sample: searchUser("Jim", 0) will fetch the first 20 results
-//				searchUser("Jim", 1) will fetch the next 20 results
+//usage sample: searchUser("Jim", 0, firstcallback) will fetch the first 20 results and the firstcallback method will be called
+//				searchUser("Jim", 1, secondcallback) will fetch the next 20 results and secondcallback will be called
 
-protected function searchUser(searchString:String, offset:int):void
+protected function searchUser(searchString:String, offset:int, callback:Function):void
 {
 	var offsetTxt:String;
 	offsetTxt = String(offset*20);
@@ -83,6 +89,8 @@ protected function searchUser(searchString:String, offset:int):void
 	{
 		users = new ArrayList();
 	}
+	//assign the call back
+	searchUserCallback = callback;
 	
 	var searchMethod:String = "/search?q=" + searchString + "&type=user&format=json&limit=20&offset="+offsetTxt+"&";
 	FacebookDesktop.api(searchMethod, searchResultsHandler);
@@ -181,6 +189,9 @@ protected function mutualFriendsHandler(success:Object): void
 		
 		trace(users.length);
 		
+		//the users list is completely populated at this point
+		//call the callback function
+		searchUserCallback();
 	}
 	
 }
