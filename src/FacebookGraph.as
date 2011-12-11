@@ -334,6 +334,12 @@ private function updatePageIndex(pageIndexList:ArrayList, newIndex:int): void
 //
 //This function always adds to the users list, so to get the previous results just traverse back up the users list
 //
+//This method now will also populate the four lists namely friends, innerCircle, outerCircle, noMutuals
+//
+//Also the four pagination lists will be populated viz friendsPageIndex, etc. A list for each circle so to say .
+//Each element of the pagination have the form {start:int, end:int}
+//indicating start index and end index for a page
+//
 //usage sample: searchUser("Jim", 0, firstcallback) will fetch the first 20 results and the firstcallback method will be called
 //				searchUser("Jim", 1, secondcallback) will fetch the next 20 results and secondcallback will be called
 protected function searchUser(searchString:String, offset:int, callbackarg:Function):void
