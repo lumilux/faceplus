@@ -9,13 +9,14 @@ package {
 	
 	public class CircleContainer extends UIComponent {
 		public var radius:int;
-		public var cColor:uint = 0xEEEEEE;
+		public var cColor:uint = 0x000000;
 		
 		private var circle:Shape;
 		[Bindable]
 		private var items:ArrayList;
 		
 		public function CircleContainer(x:int, y:int, radius:int) {
+			super();
 			this.x = x;
 			this.y = y;
 			this.radius = radius;
@@ -41,8 +42,8 @@ package {
 			circle.graphics.lineStyle(1, 0x6666FF, 0.5);
 			circle.graphics.drawCircle(this.x, this.y, this.radius);
 			circle.graphics.endFill();
+			//drawItems();
 			addChild(circle);
-			drawItems();
 		}
 		
 		private function drawPolarUser(user:User, theta:Number) {

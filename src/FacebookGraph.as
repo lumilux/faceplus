@@ -33,6 +33,11 @@ private var searchUserCallback:Function;				//this is the callback to be called 
 protected function windowedapplication1_creationCompleteHandler(event:FlexEvent):void
 {
 	// TODO Auto-generated method stub
+	// display results in circle
+	var circle:CircleContainer = new CircleContainer(0, 0, 200);
+	//circle.addItem(users.getItemAt(0));
+	circle.draw();
+	test.addChild(circle);
 	FacebookDesktop.init("283561771688383");
 	
 }
@@ -53,7 +58,7 @@ protected function loginHandler(success:Object,fail:Object):void
 		//set the access token and the user id for future use
 		ACCESS_TOKEN = success.accessToken;
 		USER_ID = success.uid;
-		trace("success!");
+		trace("login successful!");
 		this.currentState = "loggedin";
 		
 		//this is just a test
