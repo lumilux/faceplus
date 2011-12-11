@@ -57,7 +57,7 @@ protected function loginHandler(success:Object,fail:Object):void
 		this.currentState = "loggedin";
 		
 		//this is just a test
-		searchUser("Jim", 0, dummySampleCallback);
+		//searchUser("Jim", 0, dummySampleCallback);
 		
 	}
 }
@@ -197,7 +197,7 @@ private function readEducation(userBody:Object, user:User): void
 				s.year = "";
 			}
 						
-			userBody.education.addItem(s);
+			//userBody.education.addItem(s);
 		}		
 	}
 }

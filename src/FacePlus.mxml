@@ -41,22 +41,40 @@
 						
 						// loop through resultset and add configure filters
 						var locations:Array = new Array();
-	
+						
 						trace("users! is "+users);
 						for(var i=0;i<users.length;i++) {
 							var loc = users.getItemAt(i).location;
 							trace(users.getItemAt(i).name+": "+loc+", "+users.getItemAt(i).network);
-							if(loc) {
+							if(loc != "") {
 								if(!locations[loc]) {
+									trace("creating new bucket for key "+loc);
+									locations.push(loc);
 									locations[loc] = new ArrayList();
 								}
 								locations[loc].addItem(users.getItemAt(i));
+								trace(locations[loc]+" and "+locations.length);
 							}
 						}
 						
 						// sort locations by size of list
-						
-						
+						var sortedKeys:Array = new Array();
+						trace(sortedKeys.length+" "+locations.length);
+						while(sortedKeys.length < locations.length) {
+							var currMax = (sortedKeys.length == 0) ? 0 : locations[sortedKeys[sortedKeys.length-1]].length;
+							var currKey = null;
+							for(var loc in locations) {
+								if(sortedKeys.indexOf(loc) == -1) {
+									if(locations[loc].length > currMax) {
+										currMax = locations[loc].length;
+										currKey = loc;
+									}
+								}
+							}
+							trace("adding "+loc);
+							sortedKeys.push(loc);
+						}
+						trace("sortedkeys: "+sortedKeys);
 					}); // end search user callback
 				}
 			}
