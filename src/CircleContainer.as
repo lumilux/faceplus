@@ -55,7 +55,7 @@ package {
 		
 		private function drawUser(user:User, x:int, y:int) {
 			var name_lbl:Label = new Label();
-			name_lbl.text = user.name;
+			name_lbl.text = user.name.replace(" ", "\n");
 			name_lbl.move(this.x + x, this.y + y);
 			this.parent.addChild(name_lbl);
 		}

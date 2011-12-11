@@ -15,6 +15,11 @@
 			
 			var beginType:Boolean = false; // toggled once when the user clicks the search box
 			
+			// global vars for the circles
+			var outerCircle:CircleContainer;
+			var innerCircle:CircleContainer;
+			var friendCircle:CircleContainer;
+			
 			// dummy function for testing
 			protected function dummyLogin(event:MouseEvent):void {
 				currentState = "loggedin";
@@ -73,28 +78,135 @@
 									educations[eds[j].name].addItem(users.getItemAt(i));
 								}
 							}
-
+							
 						}
 						
 						trace("after loop educations is "+educations);
 						
 						var sortedKeysLoc:Array = rankSort(locations, locSize);
 						trace("sortedkeys location: "+sortedKeysLoc+", length"+sortedKeysLoc.length);
-						
 						updateFilterDisplays(sortedKeysLoc, [loc1, loc2, loc3, loc4]);
 						
 						updateFilterDisplays(rankSort(educations, edsSize), [ed1, ed2, ed3, ed4], "eds");
 						
-						// display results in circle
-						var circle:CircleContainer = new CircleContainer(100, 100, 100);
-						circleArea.addChild(circle);
-						for(var i:int = 0; i < users.length; i++) {
-							circle.addItem(users.getItemAt(i));
+						// display results in circles
+						outerCircle = new CircleContainer(180, 100, 200);
+						circleArea.addChild(outerCircle);
+						for(var i:int = 0; i < outer.length; i++) {
+							outerCircle.addItem(outer.getItemAt(i));
 						}
-						circle.drawItems();
-
+						outerCircle.drawItems();
+						
+						innerCircle = new CircleContainer(180, 100, 150);
+						circleArea.addChild(innerCircle);
+						for(var i:int = 0; i < inner.length; i++) {
+							innerCircle.addItem(inner.getItemAt(i));
+						}
+						innerCircle.drawItems();
+						
+						friendCircle = new CircleContainer(180, 100, 100);
+						circleArea.addChild(friendCircle);
+						for(var i:int = 0; i < friends.length; i++) {
+							friendCircle.addItem(friends.getItemAt(i));
+						}
+						friendCircle.drawItems();
+						
 					}); // end search user callback
 				}
+			}
+			
+			protected function handleFilter(event:Event):void {
+				var allLocs:Array = [loc1, loc2, loc3, ed1, ed2, ed3];
+				var atLeastOneSelected:Boolean = false; // if no filter has been selected, display everything
+				for(var i=0;i<allLocs.length;i++) {
+					if(allLocs[i].selected) {
+						trace("at least one selected!");
+						atLeastOneSelected = true;
+						break;
+					}
+				}
+				if(event.currentTarget.hasOwnProperty("selectedIndex") && event.currentTarget.selectedIndex >= 0) {
+					atLeastOneSelected = true;
+				}
+				
+				// reset and redraw everything
+				outerCircle.clearItems();
+				innerCircle.clearItems();
+				friendCircle.clearItems();
+				circleArea.removeAllChildren();
+				
+				outerCircle = new CircleContainer(180, 100, 200);
+				circleArea.addChild(outerCircle);
+				innerCircle = new CircleContainer(180, 100, 150);
+				circleArea.addChild(innerCircle);
+				friendCircle = new CircleContainer(180, 100, 100);
+				circleArea.addChild(friendCircle);
+				
+				for(var i=0;i<allLocs.length;i++) {
+					drawItemBasedOnFilter(allLocs[i], atLeastOneSelected);
+					
+					if(!atLeastOneSelected) {
+						break;
+					}
+				} // end loop through "normal" checkbox locations
+				
+				// do special case for comboboxes
+				if(event.currentTarget.hasOwnProperty("selectedItem") && event.currentTarget.selectedItem.label != "") {
+					//trace(event.currentTarget.selectedItem.label);
+					drawItemBasedOnFilter(event.currentTarget.selectedItem, atLeastOneSelected);
+				}
+			}
+			
+			/**
+			 * Helper/abstraction function.
+			 * Redraws circles, based upon if filter is checked. */
+			private function drawItemBasedOnFilter(filter, atLeastOneSelected:Boolean = false):void {
+				var label:String = filter.hasOwnProperty("labelField") ? filter.labelField : filter.label;
+				trace("filter label is "+label);
+				for(var j:int = 0; j < outer.length; j++) {
+					var currUser = outer.getItemAt(j);
+					trace("testing location "+currUser.location);
+					if(currUser.location == label && filter.selected || !atLeastOneSelected) {
+						outerCircle.addItem(currUser);
+						trace("here?");
+					} else {
+						for(var k=0;k<currUser.education.length;k++) {
+							if(currUser.education[k].name == label && filter.selected) {
+								outerCircle.addItem(currUser);
+							}
+						}
+					}
+				}
+				outerCircle.drawItems();
+				
+				for(var j:int = 0; j < inner.length; j++) {
+					var currUser = inner.getItemAt(j);
+					trace("testing location "+currUser.location);
+					if(currUser.location == label && filter.selected || !atLeastOneSelected) {
+						innerCircle.addItem(currUser);
+					} else {
+						for(var k=0;k<currUser.education.length;k++) {
+							if(currUser.education[k].name == label && filter.selected) {
+								innerCircle.addItem(currUser);
+							}
+						}
+					}
+				}
+				innerCircle.drawItems();
+				
+				for(var j:int = 0; j < friends.length; j++) {
+					var currUser = friends.getItemAt(j);
+					if(currUser.location == label && filter.selected || !atLeastOneSelected) {
+						friendCircle.addItem(currUser);
+					} else {
+						for(var k=0;k<currUser.education.length;k++) {
+							if(currUser.education[k].name == label && filter.selected) {
+								friendCircle.addItem(currUser);
+							}
+						}
+					}
+				}
+				friendCircle.drawItems();
 			}
 			
 			/**
@@ -203,19 +315,19 @@
 		<s:Label includeIn="loggedin" x="37" y="419" fontFamily="Helvetica Neue Light" fontSize="14"
 				 text="Workplace"/>
 		<s:CheckBox id="ed1" includeIn="loggedin" x="37" y="149" label="Columbia"
-					fontFamily="Helvetica Neue Light"/>
+					fontFamily="Helvetica Neue Light" click="handleFilter(event)" />
 		<s:CheckBox id="ed2" includeIn="loggedin" x="37" y="169" label="NYU"
-					fontFamily="Helvetica Neue Light"/>
+					fontFamily="Helvetica Neue Light" click="handleFilter(event)" />
 		<s:CheckBox id="ed3" includeIn="loggedin" x="37" y="189" label="Brown"
-					fontFamily="Helvetica Neue Light"/>
+					fontFamily="Helvetica Neue Light" click="handleFilter(event)" />
 		<s:ComboBox id="ed4" includeIn="loggedin" x="38" y="216" width="105" fontFamily="Helvetica Neue Light">
 			
 		</s:ComboBox>
 		<s:CheckBox id="loc1" includeIn="loggedin" x="37" y="289" label="New York, NY"
-					fontFamily="Helvetica Neue Light"/>
-		<s:CheckBox id="loc2" includeIn="loggedin" x="37" y="309" label="Boston, MA" fontFamily="Helvetica Neue Light"/>
-		<s:CheckBox id="loc3" includeIn="loggedin" x="37" y="329" label="Washington, D.C." fontFamily="Helvetica Neue Light"/>
-		<s:ComboBox id="loc4" includeIn="loggedin" x="38" y="356" width="105" fontFamily="Helvetica Neue Light">
+					fontFamily="Helvetica Neue Light" click="handleFilter(event)" />
+		<s:CheckBox id="loc2" includeIn="loggedin" x="37" y="309" label="Boston, MA" fontFamily="Helvetica Neue Light" click="handleFilter(event)"/>
+		<s:CheckBox id="loc3" includeIn="loggedin" x="37" y="329" label="Washington, D.C." fontFamily="Helvetica Neue Light" click="handleFilter(event)"/>
+		<s:ComboBox id="loc4" includeIn="loggedin" x="38" y="356" width="105" fontFamily="Helvetica Neue Light" change="handleFilter(event)">
 			
 		</s:ComboBox>
 		<s:CheckBox includeIn="loggedin" x="37" y="441" label="Microsoft"
@@ -235,7 +347,7 @@
 			</mx:ArrayList> 
 		</s:ComboBox>
 	</s:Group>
-	<mx:Canvas id="circleArea" width="600" height="400" x="200" y="100" borderColor="0xCCCCCC" borderVisible="true" borderStyle="solid">
+	<mx:Canvas id="circleArea" width="600" height="500" x="200" y="100">
 		
 	</mx:Canvas>
 </s:WindowedApplication>

@@ -25,8 +25,8 @@ public var ids:ArrayList = new ArrayList();			//holds the ids of search results,
 public var friendIds:ArrayList = new ArrayList();
 //the four lists 
 public var friends:ArrayList = new ArrayList();
-public var innerCircle:ArrayList = new ArrayList();
-public var outerCirlce:ArrayList = new ArrayList();
+public var inner:ArrayList = new ArrayList();
+public var outer:ArrayList = new ArrayList();
 public var noMutuals:ArrayList = new ArrayList();
 
 //the four pagination lists
@@ -280,11 +280,11 @@ protected function makeLists()
 	
 	for(j = 0; j < innerCirceLimit; j++)
 	{
-		innerCircle.addItem(nonZeroMutuals.getItemAt(j,0));
+		inner.addItem(nonZeroMutuals.getItemAt(j,0));
 	}
 	for( ; j < nonZeroMutuals.length; j++)
 	{
-		outerCirlce.addItem(nonZeroMutuals.getItemAt(j,0));
+		outer.addItem(nonZeroMutuals.getItemAt(j,0));
 	}
 	
 	//at this point all the lists are correctly populated
@@ -292,13 +292,13 @@ protected function makeLists()
 	
 	
 	trace("Friends" + friends);
-	trace("Inner Circle" + innerCircle);
-	trace("Outer Circle" + outerCirlce);
+	trace("Inner Circle" + inner);
+	trace("Outer Circle" + outer);
 	trace("No Mutuals" + noMutuals);
 	
 	updatePageIndex(friendsPageIndex, friends.length - 1);
-	updatePageIndex(innerCirclePageIndex, innerCircle.length - 1);
-	updatePageIndex(outerCircelpageIndex, outerCirlce.length - 1);
+	updatePageIndex(innerCirclePageIndex, inner.length - 1);
+	updatePageIndex(outerCircelpageIndex, outer.length - 1);
 	updatePageIndex(noMutualsPageIndex, noMutuals.length - 1);				
 	
 	//make the callback	
@@ -355,8 +355,8 @@ protected function searchUser(searchString:String, offset:int, callbackarg:Funct
 		users.removeAll();
 		
 		//clear the existing circle Lists
-		innerCircle.removeAll();
-		outerCirlce.removeAll();
+		inner.removeAll();
+		outer.removeAll();
 		friends.removeAll();
 		noMutuals.removeAll();
 		
