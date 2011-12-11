@@ -57,6 +57,11 @@
 						// sort locations by size of list
 						
 						
+						// display results in circle
+						var circle:CircleContainer = new CircleContainer(500, 500, 200);
+						circle.addItem(users.getItemAt(0));
+						circle.draw();
+						
 					}); // end search user callback
 				}
 			}
