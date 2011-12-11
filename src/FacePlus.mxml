@@ -99,13 +99,14 @@
 							sortedKeys.push(currKey);
 						}
 						trace("sortedkeys: "+sortedKeys);
-			
+						
 						// display results in circle
 						var circle:CircleContainer = new CircleContainer(100, 100, 100);
-						circle.addItem(users.getItemAt(0));
-						circle.draw();
 						circleArea.addChild(circle);
-						
+						for(var i:int = 0; i < users.length; i++) {
+							circle.addItem(users.getItemAt(i));
+						}
+						circle.drawItems();
 					
 
 					}); // end search user callback
@@ -202,7 +203,7 @@
 			</mx:ArrayList> 
 		</s:ComboBox>
 	</s:Group>
-	<mx:Container id="circleArea" width="600" height="400" x="200" y="100" borderColor="0xCCCCCC" borderVisible="true" borderStyle="solid">
+	<mx:Canvas id="circleArea" width="600" height="400" x="200" y="100" borderColor="0xCCCCCC" borderVisible="true" borderStyle="solid">
 		
-	</mx:Container>
+	</mx:Canvas>
 </s:WindowedApplication>
