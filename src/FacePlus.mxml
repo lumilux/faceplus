@@ -8,9 +8,12 @@
 	</fx:Declarations>
 	<fx:Script>
 		<![CDATA[
+			import flash.utils.getQualifiedClassName;
+			
 			import mx.collections.*;
 			
 			import spark.effects.Fade;
+			
 			include "FacebookGraph.as";
 			
 			var beginType:Boolean = false; // toggled once when the user clicks the search box
@@ -85,11 +88,15 @@
 						
 						var sortedKeysLoc:Array = rankSort(locations, locSize);
 						trace("sortedkeys location: "+sortedKeysLoc+", length"+sortedKeysLoc.length);
-						updateFilterDisplays(sortedKeysLoc, [loc1, loc2, loc3, loc4]);
+						updateFilterDisplays(sortedKeysLoc, locgroup);
 						
-						updateFilterDisplays(rankSort(educations, edsSize), [ed1, ed2, ed3, ed4], "eds");
+						updateFilterDisplays(rankSort(educations, edsSize), edgroup);
 						
-						// display results in circles
+						// reset circleArea and display results in circles
+						while(circleArea.numChildren > 0) {
+							circleArea.removeChildAt(0);
+						}
+						
 						outerCircle = new CircleContainer(180, 100, 200);
 						circleArea.addChild(outerCircle);
 						for(var i:int = 0; i < outer.length; i++) {
@@ -116,7 +123,13 @@
 			}
 			
 			protected function handleFilter(event:Event):void {
-				var allLocs:Array = [loc1, loc2, loc3, ed1, ed2, ed3];
+				var allLocs:Array = locgroup.getChildren();
+				for(var i=0;i<edgroup.getChildren().length;i++) {
+					allLocs.push(edgroup.getChildAt(i));
+				}
+				for(var i=0;i<allLocs.length;i++) {
+					trace("testing allloc "+allLocs[i].label);
+				}
 				var atLeastOneSelected:Boolean = false; // if no filter has been selected, display everything
 				for(var i=0;i<allLocs.length;i++) {
 					if(allLocs[i].selected) {
@@ -124,91 +137,55 @@
 						atLeastOneSelected = true;
 						break;
 					}
-				}
-				if(event.currentTarget.hasOwnProperty("selectedIndex") && event.currentTarget.selectedIndex >= 0) {
-					atLeastOneSelected = true;
-				}
-				
-				// reset and redraw everything
-				outerCircle.clearItems();
-				innerCircle.clearItems();
-				friendCircle.clearItems();
-				circleArea.removeAllChildren();
-				
-				outerCircle = new CircleContainer(180, 100, 200);
-				circleArea.addChild(outerCircle);
-				innerCircle = new CircleContainer(180, 100, 150);
-				circleArea.addChild(innerCircle);
-				friendCircle = new CircleContainer(180, 100, 100);
-				circleArea.addChild(friendCircle);
-				
-				for(var i=0;i<allLocs.length;i++) {
-					drawItemBasedOnFilter(allLocs[i], atLeastOneSelected);
-					
-					if(!atLeastOneSelected) {
-						break;
+				}				
+				if(atLeastOneSelected) {
+					bigloop: for(var i=0;i<circleArea.numChildren;i++) {
+						//trace("qualified classname is "+getQualifiedClassName(circleArea.getChildAt(i)));
+						if(getQualifiedClassName(circleArea.getChildAt(i)) == "spark.components::Label") {
+							var currName = (circleArea.getChildAt(i) as spark.components.Label).text.replace("\n", " "); // the current person we're testing
+							// loop through users. when we come across currName, if he's not part of the location/ed/workplace, then we hide the current child
+							for(var j=0;j<users.length;j++) {
+								var currUser:User = users.getItemAt(j) as User;
+								//trace("currName is "+currName+" and curruser.name is "+currUser.name);
+								if(currUser.name == currName) {
+									var hideThisUser:Boolean = true;
+									for(var k=0;k<allLocs.length;k++) {
+										// check to see if our current filter matches any of this person's properties
+										//trace("currchild is "+i+" curruser.location is "+currUser.location+" and label is "+allLocs[k].label+" and selected is "+allLocs[k].selected);
+										if(currUser.location == allLocs[k].label && allLocs[k].selected) {
+											trace("INSIDE HERE!!!! iteration "+k+", "+i);
+											hideThisUser = false;
+											trace("hidethisuser is "+hideThisUser);
+										} else {
+											// gotta loop through education array
+											for(var m=0;m<currUser.education.length;m++) {
+												if(currUser.education[m].name == allLocs[k].label && allLocs[k].selected) {
+													hideThisUser = false;
+												}
+											}
+										}
+									}
+									trace("child "+i+" has label "+currName+". we are testing against user "+currUser.name+" who has location "+currUser.location+". hidethisuser is "+hideThisUser);
+									if(hideThisUser == true) {
+										trace("hiding child "+i+" because hideThisUser is "+hideThisUser);
+										circleArea.getChildAt(i).visible = false;
+									} else {
+										trace("we are NOT hiding child "+i);
+									}
+									break; // once we've encountered one.. break out
+								} // end check to find the current label's User
+							} // end loop through users
+						} //end check to see if current child is a label 
+					} // end loop through children
+				} else { // if nothing is selected, display 'em all
+					for(var i=0;i<circleArea.numChildren;i++) {
+						if(getQualifiedClassName(circleArea.getChildAt(i)) == "spark.components::Label") {
+							circleArea.getChildAt(i).visible = true;
+						}
 					}
-				} // end loop through "normal" checkbox locations
-				
-				// do special case for comboboxes
-				if(event.currentTarget.hasOwnProperty("selectedItem") && event.currentTarget.selectedItem.label != "") {
-					//trace(event.currentTarget.selectedItem.label);
-					drawItemBasedOnFilter(event.currentTarget.selectedItem, atLeastOneSelected);
 				}
 			}
-			
-			/**
-			 * Helper/abstraction function.
-			 * Redraws circles, based upon if filter is checked. */
-			private function drawItemBasedOnFilter(filter, atLeastOneSelected:Boolean = false):void {
-				var label:String = filter.hasOwnProperty("labelField") ? filter.labelField : filter.label;
-				trace("filter label is "+label);
-				for(var j:int = 0; j < outer.length; j++) {
-					var currUser = outer.getItemAt(j);
-					trace("testing location "+currUser.location);
-					if(currUser.location == label && filter.selected || !atLeastOneSelected) {
-						outerCircle.addItem(currUser);
-						trace("here?");
-					} else {
-						for(var k=0;k<currUser.education.length;k++) {
-							if(currUser.education[k].name == label && filter.selected) {
-								outerCircle.addItem(currUser);
-							}
-						}
-					}
-				}
-				outerCircle.drawItems();
-				
-				for(var j:int = 0; j < inner.length; j++) {
-					var currUser = inner.getItemAt(j);
-					trace("testing location "+currUser.location);
-					if(currUser.location == label && filter.selected || !atLeastOneSelected) {
-						innerCircle.addItem(currUser);
-					} else {
-						for(var k=0;k<currUser.education.length;k++) {
-							if(currUser.education[k].name == label && filter.selected) {
-								innerCircle.addItem(currUser);
-							}
-						}
-					}
-				}
-				innerCircle.drawItems();
-				
-				for(var j:int = 0; j < friends.length; j++) {
-					var currUser = friends.getItemAt(j);
-					if(currUser.location == label && filter.selected || !atLeastOneSelected) {
-						friendCircle.addItem(currUser);
-					} else {
-						for(var k=0;k<currUser.education.length;k++) {
-							if(currUser.education[k].name == label && filter.selected) {
-								friendCircle.addItem(currUser);
-							}
-						}
-					}
-				}
-				friendCircle.drawItems();
-			}
-			
+						
 			/**
 			 * Returns an array of keys whose ordering corresponds to the ranking of values in dict.
 			 */
@@ -240,38 +217,53 @@
 			 * Updates the filters based on orderings array.
 			 * Inputs are the input fields to be updated.
 			 */
-			private function updateFilterDisplays(ordering:Array, inputs:Array, specialType:String = null):void {
-				if(ordering.length >= 1) {
-					inputs[0].label = ordering[0];
-					inputs[0].visible = true;
+			private function updateFilterDisplays(ordering:Array, group:Canvas):void {
+				/*if(ordering.length >= 1) {
+				inputs[0].label = ordering[0];
+				inputs[0].visible = true;
 				} else {
-					inputs[0].visible = false;
+				inputs[0].visible = false;
 				}
 				if(ordering.length >= 2) {
-					inputs[1].label = ordering[1];
-					inputs[1].visible = true;
+				inputs[1].label = ordering[1];
+				inputs[1].visible = true;
 				} else {
-					inputs[1].visible = false;
+				inputs[1].visible = false;
 				}
 				if(ordering.length >= 3) {
-					inputs[2].label = ordering[2];
-					inputs[2].visible = true;
+				inputs[2].label = ordering[2];
+				inputs[2].visible = true;
 				} else {
-					inputs[2].visible = false;
+				inputs[2].visible = false;
 				}
 				if(ordering.length >= 4) {
-					var loc4List:ArrayCollection = new ArrayCollection();
-					for(var i=3;i<ordering.length;i++) {
-						if(specialType == "eds") {
-							trace(ordering[i]);
-							loc4List.addItem({label: ordering[i], data: ordering[i]});
-						} else {
-							loc4List.addItem({label: ordering[i], data: ordering[i]});
-						}
-					}
-					inputs[3].dataProvider = loc4List;
+				var loc4List:ArrayCollection = new ArrayCollection();
+				for(var i=3;i<ordering.length;i++) {
+				if(specialType == "eds") {
+				trace(ordering[i]);
+				loc4List.addItem({label: ordering[i], data: ordering[i]});
 				} else {
-					inputs[3].visible = false;
+				loc4List.addItem({label: ordering[i], data: ordering[i]});
+				}
+				}
+				inputs[3].dataProvider = loc4List;
+				} else {
+				inputs[3].visible = false;
+				}*/
+				// remove current checkboxes and replace with new ones
+				while(group.numChildren > 0) {
+					group.removeChildAt(0);
+				}				
+				
+				var currY = 0;
+				for(var i=0;i<ordering.length;i++) {
+					var cb:CheckBox = new CheckBox();
+					cb.y = currY;
+					cb.label = ordering[i];
+					cb.setStyle("fontFamily", "Helvetica Neue Light");
+					cb.addEventListener(MouseEvent.CLICK, handleFilter);
+					group.addChild(cb);
+					currY += 20;
 				}
 			}
 		]]>
@@ -314,22 +306,28 @@
 		<s:Image includeIn="loggedin" x="19" y="420" source="images/briefcase.png"/>
 		<s:Label includeIn="loggedin" x="37" y="419" fontFamily="Helvetica Neue Light" fontSize="14"
 				 text="Workplace"/>
-		<s:CheckBox id="ed1" includeIn="loggedin" x="37" y="149" label="Columbia"
-					fontFamily="Helvetica Neue Light" click="handleFilter(event)" />
+		<!--<s:CheckBox id="ed1" includeIn="loggedin" x="37" y="149" label="Columbia"
+		fontFamily="Helvetica Neue Light" click="handleFilter(event)" />
 		<s:CheckBox id="ed2" includeIn="loggedin" x="37" y="169" label="NYU"
-					fontFamily="Helvetica Neue Light" click="handleFilter(event)" />
+		fontFamily="Helvetica Neue Light" click="handleFilter(event)" />
 		<s:CheckBox id="ed3" includeIn="loggedin" x="37" y="189" label="Brown"
-					fontFamily="Helvetica Neue Light" click="handleFilter(event)" />
+		fontFamily="Helvetica Neue Light" click="handleFilter(event)" />
 		<s:ComboBox id="ed4" includeIn="loggedin" x="38" y="216" width="105" fontFamily="Helvetica Neue Light">
+		
+		</s:ComboBox>-->
+		<mx:Canvas id="edgroup" x="37" y="149" width="180" height="100" horizontalScrollPolicy="off">
 			
-		</s:ComboBox>
-		<s:CheckBox id="loc1" includeIn="loggedin" x="37" y="289" label="New York, NY"
-					fontFamily="Helvetica Neue Light" click="handleFilter(event)" />
+		</mx:Canvas>
+		<!--<s:CheckBox id="loc1" includeIn="loggedin" x="37" y="289" label="New York, NY"
+		fontFamily="Helvetica Neue Light" click="handleFilter(event)" />
 		<s:CheckBox id="loc2" includeIn="loggedin" x="37" y="309" label="Boston, MA" fontFamily="Helvetica Neue Light" click="handleFilter(event)"/>
 		<s:CheckBox id="loc3" includeIn="loggedin" x="37" y="329" label="Washington, D.C." fontFamily="Helvetica Neue Light" click="handleFilter(event)"/>
 		<s:ComboBox id="loc4" includeIn="loggedin" x="38" y="356" width="105" fontFamily="Helvetica Neue Light" change="handleFilter(event)">
+		
+		</s:ComboBox>-->
+		<mx:Canvas id="locgroup" x="37" y="290" width="180" height="100" horizontalScrollPolicy="off">
 			
-		</s:ComboBox>
+		</mx:Canvas>
 		<s:CheckBox includeIn="loggedin" x="37" y="441" label="Microsoft"
 					fontFamily="Helvetica Neue Light"/>
 		<s:CheckBox includeIn="loggedin" x="37" y="461" label="Google" fontFamily="Helvetica Neue Light"/>
