@@ -88,9 +88,9 @@
 						
 						var sortedKeysLoc:Array = rankSort(locations, locSize);
 						trace("sortedkeys location: "+sortedKeysLoc+", length"+sortedKeysLoc.length);
-						updateFilterDisplays(sortedKeysLoc, locgroup);
+						updateFilterDisplays(sortedKeysLoc, locgroup, [myLocation]);
 						
-						updateFilterDisplays(rankSort(educations, edsSize), edgroup);
+						updateFilterDisplays(rankSort(educations, edsSize), edgroup, myEducation);
 						
 						// reset circleArea and display results in circles
 						while(circleArea.numChildren > 0) {
@@ -185,7 +185,7 @@
 					}
 				}
 			}
-						
+			
 			/**
 			 * Returns an array of keys whose ordering corresponds to the ranking of values in dict.
 			 */
@@ -217,53 +217,34 @@
 			 * Updates the filters based on orderings array.
 			 * Inputs are the input fields to be updated.
 			 */
-			private function updateFilterDisplays(ordering:Array, group:Canvas):void {
-				/*if(ordering.length >= 1) {
-				inputs[0].label = ordering[0];
-				inputs[0].visible = true;
-				} else {
-				inputs[0].visible = false;
-				}
-				if(ordering.length >= 2) {
-				inputs[1].label = ordering[1];
-				inputs[1].visible = true;
-				} else {
-				inputs[1].visible = false;
-				}
-				if(ordering.length >= 3) {
-				inputs[2].label = ordering[2];
-				inputs[2].visible = true;
-				} else {
-				inputs[2].visible = false;
-				}
-				if(ordering.length >= 4) {
-				var loc4List:ArrayCollection = new ArrayCollection();
-				for(var i=3;i<ordering.length;i++) {
-				if(specialType == "eds") {
-				trace(ordering[i]);
-				loc4List.addItem({label: ordering[i], data: ordering[i]});
-				} else {
-				loc4List.addItem({label: ordering[i], data: ordering[i]});
-				}
-				}
-				inputs[3].dataProvider = loc4List;
-				} else {
-				inputs[3].visible = false;
-				}*/
+			private function updateFilterDisplays(ordering:Array, group:Canvas, defaults:Array):void {
+				
 				// remove current checkboxes and replace with new ones
 				while(group.numChildren > 0) {
 					group.removeChildAt(0);
 				}				
 				
 				var currY = 0;
-				for(var i=0;i<ordering.length;i++) {
+				for(var i=0;i<defaults.length;i++) {
 					var cb:CheckBox = new CheckBox();
 					cb.y = currY;
-					cb.label = ordering[i];
+					cb.label = defaults[i];
 					cb.setStyle("fontFamily", "Helvetica Neue Light");
 					cb.addEventListener(MouseEvent.CLICK, handleFilter);
 					group.addChild(cb);
 					currY += 20;
+				}
+				
+				for(var i=0;i<ordering.length;i++) {
+					if(defaults.indexOf(ordering[i]) == -1) {
+						var cb:CheckBox = new CheckBox();
+						cb.y = currY;
+						cb.label = ordering[i];
+						cb.setStyle("fontFamily", "Helvetica Neue Light");
+						cb.addEventListener(MouseEvent.CLICK, handleFilter);
+						group.addChild(cb);
+						currY += 20;
+					}
 				}
 			}
 		]]>
