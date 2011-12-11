@@ -2,6 +2,7 @@ package {
 	import flash.display.Shape;
 	
 	import mx.collections.*;
+	import mx.containers.Canvas;
 	import mx.core.UIComponent;
 	import mx.events.CollectionEvent;
 	
@@ -10,7 +11,7 @@ package {
 	public class CircleContainer extends UIComponent {
 		public var radius:int;
 		public var cColor:uint = 0xEEEEEE;
-		
+		private var cv:Canvas;
 		private var circle:Shape;
 		[Bindable]
 		private var items:ArrayList;
@@ -21,7 +22,8 @@ package {
 			this.y = y;
 			this.radius = radius;
 			items = new ArrayList();
-			items.addEventListener(CollectionEvent.COLLECTION_CHANGE, itemsChangeListener);
+			//items.addEventListener(CollectionEvent.COLLECTION_CHANGE, itemsChangeListener);
+			this.draw();
 		}
 		
 		public function addItem(item:Object) {
@@ -42,7 +44,6 @@ package {
 			circle.graphics.lineStyle(1, 0x6666FF, 0.5);
 			circle.graphics.drawCircle(this.x, this.y, this.radius);
 			circle.graphics.endFill();
-			drawItems();
 			addChild(circle);
 		}
 		
@@ -53,26 +54,24 @@ package {
 		}
 		
 		private function drawUser(user:User, x:int, y:int) {
-			var name_lbl = new Label();
-			addChild(name_lbl);
+			var name_lbl:Label = new Label();
 			name_lbl.text = user.name;
-			name_lbl.move(x, y);
+			name_lbl.move(this.x + x, this.y + y);
+			this.parent.addChild(name_lbl);
 		}
 		
-		private function drawItems() {
+		public function drawItems() {
 			//TODO: draw objects along circle
 			if(items.length == 1) {
-				drawUser(items.getItemAt(i) as User, 100, 0);
+				drawUser(items.getItemAt(i) as User, 0, 0);
 			} else if (items.length > 1) {
-				var theta = 360.0 / items.length;
+				var theta = 0.0;
+				var delta = 360.0 / items.length;
 				for(var i:int = 0; i < items.length; i++) {
 					drawPolarUser(items.getItemAt(i) as User, theta);
+					theta += delta;
 				}
 			}
-		}
-		
-		private function itemsChangeListener(e:CollectionEvent) {
-			drawItems();
 		}
 	}
 }

@@ -73,6 +73,7 @@
 									educations[eds[j].name].addItem(users.getItemAt(i));
 								}
 							}
+
 						}
 						
 						trace("after loop educations is "+educations);
@@ -84,15 +85,14 @@
 						
 						updateFilterDisplays(rankSort(educations, edsSize), [ed1, ed2, ed3, ed4], "eds");
 						
-						
-						
 						// display results in circle
 						var circle:CircleContainer = new CircleContainer(100, 100, 100);
-						circle.addItem(users.getItemAt(0));
-						circle.draw();
 						circleArea.addChild(circle);
-						
-						
+						for(var i:int = 0; i < users.length; i++) {
+							circle.addItem(users.getItemAt(i));
+						}
+						circle.drawItems();
+
 					}); // end search user callback
 				}
 			}
