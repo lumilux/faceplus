@@ -157,6 +157,8 @@ protected function userDataHandler(success:Object): void
 			
 			readEducation(success.data[count].body, u);	//read the education json obj
 			
+			readWorkPlace(success.data[count].body, u); //
+			
 			
 			//add the new user to the list
 			users.addItem(u);
@@ -171,6 +173,31 @@ protected function userDataHandler(success:Object): void
 		
 	}
 	
+}
+
+private function readWorkPlace(userBody:Object, user:User): void
+{
+	if(userBody.work)
+	{
+		var j:int;
+		for(j = 0; j < userBody.work.length; j++)
+		{
+			var w:Work = new Work();
+			
+			w.employerName = userBody.work[j].employer.name;
+			
+			userBody.work[j].location ? w.location = userBody.work[j].location : w.location = "" ;
+			
+			userBody.work[j].position ? w.position = userBody.work[j].position : w.position = "" ;
+			
+			userBody.work[j].start_date == "0000-00" ? w.startDate = "" : w.startDate = userBody.work[j].start_date;
+			
+			userBody.work[j].end_date == "0000-00" ? w.endDate = "" : w.endDate = userBody.work[j].end_date;
+			
+			user.work.addItem(w);
+			
+		}
+	}
 }
 
 private function readEducation(userBody:Object, user:User): void
@@ -232,7 +259,7 @@ protected function populateFriends(success:Object, failure:Object):void
 	
 }
 
-protected function makeLists()
+protected function makeLists(): void
 {
 	var j:int;
 	var nonFriends:ArrayCollection = new ArrayCollection();
@@ -405,9 +432,10 @@ protected function getStatusHandler(success:Object, failure:Object):void
 protected function login(event:MouseEvent):void
 {
 	FacebookDesktop.login(loginHandler, ["user_birthday", "read_stream",
-		"user_location", "friends_location",
-		"user_education_history", "friends_education_history",
-		"user_hometown", "friends_hometown"]);
+					     "user_location", "friends_location",
+					     "user_education_history", "friends_education_history",
+					     "user_work_history","friends_work_history",
+					     "user_hometown", "friends_hometown"]);
 }
 
 protected function logout(event:MouseEvent):void
