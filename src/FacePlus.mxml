@@ -100,7 +100,11 @@
 						}
 						trace("sortedkeys: "+sortedKeys);
 			
-						
+						// display results in circle
+						var circle:CircleContainer = new CircleContainer(100, 100, 100);
+						circle.addItem(users.getItemAt(0));
+						circle.draw();
+						circleArea.addChild(circle);
 						
 					
 
@@ -198,7 +202,7 @@
 			</mx:ArrayList> 
 		</s:ComboBox>
 	</s:Group>
-	<mx:Container id="test" width="400" height="400" x="100" y="100" borderColor="0x000000" borderVisible="true" borderStyle="solid">
+	<mx:Container id="circleArea" width="600" height="400" x="200" y="100" borderColor="0xCCCCCC" borderVisible="true" borderStyle="solid">
 		
 	</mx:Container>
 </s:WindowedApplication>

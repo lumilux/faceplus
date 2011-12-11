@@ -33,11 +33,6 @@ private var searchUserCallback:Function;				//this is the callback to be called 
 protected function windowedapplication1_creationCompleteHandler(event:FlexEvent):void
 {
 	// TODO Auto-generated method stub
-	// display results in circle
-	var circle:CircleContainer = new CircleContainer(0, 0, 200);
-	//circle.addItem(users.getItemAt(0));
-	circle.draw();
-	test.addChild(circle);
 	FacebookDesktop.init("283561771688383");
 	
 }
