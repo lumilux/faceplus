@@ -8,8 +8,9 @@
 	</fx:Declarations>
 	<fx:Script>
 		<![CDATA[
-			import spark.effects.Fade;
 			import mx.collections.*;
+			
+			import spark.effects.Fade;
 			include "FacebookGraph.as";
 			
 			var beginType:Boolean = false; // toggled once when the user clicks the search box
@@ -43,11 +44,16 @@
 						
 						// loop through resultset and add configure filters
 						var locations:Dictionary = new Dictionary();
+						var educations:Dictionary = new Dictionary();
+						
 						var locSize = 0;
+						var edsSize = 0;
 						trace("users! is "+users);
 						for(var i=0;i<users.length;i++) {
 							var loc = users.getItemAt(i).location;
-							trace(users.getItemAt(i).name+": "+loc+", "+users.getItemAt(i).network);
+							var eds = users.getItemAt(i).education;
+							
+							trace(users.getItemAt(i).name+": "+loc+", "+users.getItemAt(i).network+", "+eds);
 							if(loc != "") {
 								if(!locations[loc]) {
 									trace("creating new bucket for key "+loc);
@@ -57,67 +63,103 @@
 								locations[loc].addItem(users.getItemAt(i));
 								trace(locations[loc]+" and "+locations.length);
 							}
-						}
-						
-						// sort locations by size of list			
-						var sortedKeys:Array = new Array();
-						
-						// loop through each element, ignoring ones we've seen before
-						while(sortedKeys.length < locSize) {
-							var currMax = -1;
-							var currKey = null;
-							for(var loc in locations) {
-								if(sortedKeys.indexOf(loc) == -1) {
-									// find the max of the ones we see now
-									if(locations[loc].length > currMax) {
-										currMax = locations[loc].length;
-										currKey = loc;
+							if(eds != null) {
+								for(var j=0;j<eds.length;j++) {
+									if(!educations[eds[j].name]) {
+										trace("creating new bucket for key "+eds[j].name);
+										educations[eds[j].name] = new ArrayList();
+										edsSize++;
 									}
+									educations[eds[j].name].addItem(users.getItemAt(i));
 								}
 							}
-							// add this as the next element to sortedKeys
-							sortedKeys.push(currKey);
-						}
-						trace("sortedkeys: "+sortedKeys+", length"+sortedKeys.length);
-			
-
-						if(sortedKeys.length >= 1) {
-							loc1.label = sortedKeys[0];
-							loc1.visible = true;
-						} else {
-							loc1.visible = false;
-						}
-						if(sortedKeys.length >= 2) {
-							loc2.label = sortedKeys[1];
-							loc2.visible = true;
-						} else {
-							loc2.visible = false;
-						}
-						if(sortedKeys.length >= 3) {
-							loc3.label = sortedKeys[2];
-							loc3.visible = true;
-						} else {
-							loc3.visible = false;
-						}
-						if(sortedKeys.length >= 4) {
-							var loc4List:ArrayCollection = new ArrayCollection();
-							for(var i=3;i<sortedKeys.length;i++) {
-								loc4List.addItem({label: sortedKeys[i], data: sortedKeys[i]});
-							}
-							loc4.dataProvider = loc4List;
-						} else {
-							loc4.visible = false;
 						}
 						
-
+						trace("after loop educations is "+educations);
+						
+						var sortedKeysLoc:Array = rankSort(locations, locSize);
+						trace("sortedkeys location: "+sortedKeysLoc+", length"+sortedKeysLoc.length);
+						
+						updateFilterDisplays(sortedKeysLoc, [loc1, loc2, loc3, loc4]);
+						
+						updateFilterDisplays(rankSort(educations, edsSize), [ed1, ed2, ed3, ed4], "eds");
+						
+						
+						
 						// display results in circle
 						var circle:CircleContainer = new CircleContainer(100, 100, 100);
 						circle.addItem(users.getItemAt(0));
 						circle.draw();
 						circleArea.addChild(circle);
-
-
+						
+						
 					}); // end search user callback
+				}
+			}
+			
+			/**
+			 * Returns an array of keys whose ordering corresponds to the ranking of values in dict.
+			 */
+			private function rankSort(dict:Dictionary, size:int):Array {
+				// sort locations by size of list			
+				var sortedKeys:Array = new Array();
+				
+				// loop through each element, ignoring ones we've seen before
+				while(sortedKeys.length < size) {
+					var currMax = -1;
+					var currKey = null;
+					for(var key in dict) {
+						if(sortedKeys.indexOf(key) == -1) {
+							// find the max of the ones we see now
+							if(dict[key].length > currMax) {
+								currMax = dict[key].length;
+								currKey = key;
+							}
+						}
+					}
+					// add this as the next element to sortedKeys
+					sortedKeys.push(currKey);
+				}
+				
+				return sortedKeys;
+			}
+			
+			/**
+			 * Updates the filters based on orderings array.
+			 * Inputs are the input fields to be updated.
+			 */
+			private function updateFilterDisplays(ordering:Array, inputs:Array, specialType:String = null):void {
+				if(ordering.length >= 1) {
+					inputs[0].label = ordering[0];
+					inputs[0].visible = true;
+				} else {
+					inputs[0].visible = false;
+				}
+				if(ordering.length >= 2) {
+					inputs[1].label = ordering[1];
+					inputs[1].visible = true;
+				} else {
+					inputs[1].visible = false;
+				}
+				if(ordering.length >= 3) {
+					inputs[2].label = ordering[2];
+					inputs[2].visible = true;
+				} else {
+					inputs[2].visible = false;
+				}
+				if(ordering.length >= 4) {
+					var loc4List:ArrayCollection = new ArrayCollection();
+					for(var i=3;i<ordering.length;i++) {
+						if(specialType == "eds") {
+							trace(ordering[i]);
+							loc4List.addItem({label: ordering[i], data: ordering[i]});
+						} else {
+							loc4List.addItem({label: ordering[i], data: ordering[i]});
+						}
+					}
+					inputs[3].dataProvider = loc4List;
+				} else {
+					inputs[3].visible = false;
 				}
 			}
 		]]>
@@ -160,30 +202,21 @@
 		<s:Image includeIn="loggedin" x="19" y="420" source="images/briefcase.png"/>
 		<s:Label includeIn="loggedin" x="37" y="419" fontFamily="Helvetica Neue Light" fontSize="14"
 				 text="Workplace"/>
-		<s:CheckBox includeIn="loggedin" x="37" y="149" label="Columbia"
+		<s:CheckBox id="ed1" includeIn="loggedin" x="37" y="149" label="Columbia"
 					fontFamily="Helvetica Neue Light"/>
-		<s:CheckBox includeIn="loggedin" x="37" y="169" label="NYU"
+		<s:CheckBox id="ed2" includeIn="loggedin" x="37" y="169" label="NYU"
 					fontFamily="Helvetica Neue Light"/>
-		<s:CheckBox includeIn="loggedin" x="37" y="189" label="Brown"
+		<s:CheckBox id="ed3" includeIn="loggedin" x="37" y="189" label="Brown"
 					fontFamily="Helvetica Neue Light"/>
-		<s:ComboBox includeIn="loggedin" x="38" y="216" width="105" fontFamily="Helvetica Neue Light"
-					itemRenderer="educationRenderer">
-			<mx:ArrayList>
-				<fx:String>Cornell</fx:String>
-				<fx:String>MIT</fx:String>
-				<fx:String>Harvard</fx:String>
-				<fx:String>Dartmouth</fx:String>
-				<fx:String>Penn</fx:String>
-				<fx:String>Yale</fx:String>
-				<fx:String>Princeton</fx:String>
-			</mx:ArrayList> 
+		<s:ComboBox id="ed4" includeIn="loggedin" x="38" y="216" width="105" fontFamily="Helvetica Neue Light">
+			
 		</s:ComboBox>
 		<s:CheckBox id="loc1" includeIn="loggedin" x="37" y="289" label="New York, NY"
 					fontFamily="Helvetica Neue Light"/>
 		<s:CheckBox id="loc2" includeIn="loggedin" x="37" y="309" label="Boston, MA" fontFamily="Helvetica Neue Light"/>
 		<s:CheckBox id="loc3" includeIn="loggedin" x="37" y="329" label="Washington, D.C." fontFamily="Helvetica Neue Light"/>
 		<s:ComboBox id="loc4" includeIn="loggedin" x="38" y="356" width="105" fontFamily="Helvetica Neue Light">
-
+			
 		</s:ComboBox>
 		<s:CheckBox includeIn="loggedin" x="37" y="441" label="Microsoft"
 					fontFamily="Helvetica Neue Light"/>
@@ -202,7 +235,7 @@
 			</mx:ArrayList> 
 		</s:ComboBox>
 	</s:Group>
-	<mx:Container id="circleArea" width="600" height="400" x="200" y="100" borderColor="0xCCCCCC" borderVisible="true" borderStyle="solid">
+	<mx:Canvas id="circleArea" width="600" height="400" x="200" y="100" borderColor="0xCCCCCC" borderVisible="true" borderStyle="solid">
 		
-	</mx:Container>
+	</mx:Canvas>
 </s:WindowedApplication>

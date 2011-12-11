@@ -1,16 +1,22 @@
 
 // ActionScript file
+
+import User;
+
 import com.facebook.graph.FacebookDesktop;
 import com.facebook.graph.data.Batch;
 import com.facebook.graph.net.FacebookBatchRequest;
 
 import flash.events.*;
 
+import mx.collections.ArrayCollection;
 import mx.collections.ArrayList;
+import mx.controls.Label;
+import mx.core.UIComponent;
 import mx.events.*;
 import mx.events.FlexEvent;
-import User;
 
+import spark.components.Label;
 
 public var users:ArrayList = new ArrayList();			//holds the User objects that represent search results
 
@@ -33,7 +39,7 @@ private var searchUserCallback:Function;				//this is the callback to be called 
 protected function windowedapplication1_creationCompleteHandler(event:FlexEvent):void
 {
 	// TODO Auto-generated method stub
-
+	
 	FacebookDesktop.init("283561771688383");
 	
 }
@@ -183,6 +189,7 @@ private function readEducation(userBody:Object, user:User): void
 	if(userBody.education != null)
 	{
 		var j:int;
+		user.education = new ArrayCollection();
 		for(j = 0; j < userBody.education.length; j++)
 		{
 			var s:School = new School();
@@ -197,8 +204,8 @@ private function readEducation(userBody:Object, user:User): void
 			{
 				s.year = "";
 			}
-						
-			//userBody.education.addItem(s);
+			
+			user.education.addItem(s);
 		}		
 	}
 }
