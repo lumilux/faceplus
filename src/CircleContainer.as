@@ -9,7 +9,7 @@ package {
 	
 	public class CircleContainer extends UIComponent {
 		public var radius:int;
-		public var cColor:uint = 0x000000;
+		public var cColor:uint = 0xEEEEEE;
 		
 		private var circle:Shape;
 		[Bindable]
@@ -42,7 +42,7 @@ package {
 			circle.graphics.lineStyle(1, 0x6666FF, 0.5);
 			circle.graphics.drawCircle(this.x, this.y, this.radius);
 			circle.graphics.endFill();
-			//drawItems();
+			drawItems();
 			addChild(circle);
 		}
 		
@@ -54,15 +54,15 @@ package {
 		
 		private function drawUser(user:User, x:int, y:int) {
 			var name_lbl = new Label();
+			addChild(name_lbl);
 			name_lbl.text = user.name;
 			name_lbl.move(x, y);
-			addChild(name_lbl);
 		}
 		
 		private function drawItems() {
 			//TODO: draw objects along circle
 			if(items.length == 1) {
-				drawUser(items.getItemAt(i) as User, 0, 0);
+				drawUser(items.getItemAt(i) as User, 100, 0);
 			} else if (items.length > 1) {
 				var theta = 360.0 / items.length;
 				for(var i:int = 0; i < items.length; i++) {
