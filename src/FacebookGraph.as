@@ -33,6 +33,7 @@ private var searchUserCallback:Function;				//this is the callback to be called 
 protected function windowedapplication1_creationCompleteHandler(event:FlexEvent):void
 {
 	// TODO Auto-generated method stub
+
 	FacebookDesktop.init("283561771688383");
 	
 }
