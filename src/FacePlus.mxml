@@ -9,6 +9,7 @@
 	<fx:Script>
 		<![CDATA[
 			import spark.effects.Fade;
+			import mx.collections.*;
 			include "FacebookGraph.as";
 			
 			var beginType:Boolean = false; // toggled once when the user clicks the search box
@@ -30,7 +31,7 @@
 				
 				if(event.keyCode == 13) {
 					spinner.visible = true;
-					searchUser(searchbox.text, 0, function() {
+					searchUser(searchbox.text, 0, function() { // CALLBACK FROM SEARCH
 						spinner.visible = false;
 						var fd:spark.effects.Fade = new Fade(filtersgroup);
 						if(filtersgroup.visible == false) {
@@ -58,28 +59,7 @@
 							}
 						}
 						
-						// sort locations by size of list
-						/*var sortedKeys:Array = new Array();
-						trace(sortedKeys.length+" "+locations.length);
-						while(sortedKeys.length < locations.length) {
-							var currMax = (sortedKeys.length == 0) ? 0 : locations[sortedKeys[sortedKeys.length-1]].length;
-							trace("currmax is "+currMax);
-							var currKey = null;
-							for(var loc in locations) {
-								trace("currently testing key "+loc);
-								if(sortedKeys.indexOf(loc) == -1) {
-									//trace("made it through for "+loc);
-									if(locations[loc].length > currMax) {
-										currMax = locations[loc].length;
-										//trace("resetting currKey to "+loc);
-										currKey = loc;
-									}
-								}
-							}
-							trace("adding "+currKey);
-							sortedKeys.push(currKey);
-						}*/
-						
+						// sort locations by size of list			
 						var sortedKeys:Array = new Array();
 						
 						// loop through each element, ignoring ones we've seen before
@@ -98,11 +78,36 @@
 							// add this as the next element to sortedKeys
 							sortedKeys.push(currKey);
 						}
-						trace("sortedkeys: "+sortedKeys);
+						trace("sortedkeys: "+sortedKeys+", length"+sortedKeys.length);
 			
+						if(sortedKeys.length >= 1) {
+							loc1.label = sortedKeys[0];
+							loc1.visible = true;
+						} else {
+							loc1.visible = false;
+						}
+						if(sortedKeys.length >= 2) {
+							loc2.label = sortedKeys[1];
+							loc2.visible = true;
+						} else {
+							loc2.visible = false;
+						}
+						if(sortedKeys.length >= 3) {
+							loc3.label = sortedKeys[2];
+							loc3.visible = true;
+						} else {
+							loc3.visible = false;
+						}
+						if(sortedKeys.length >= 4) {
+							var loc4List:ArrayCollection = new ArrayCollection();
+							for(var i=3;i<sortedKeys.length;i++) {
+								loc4List.addItem({label: sortedKeys[i], data: sortedKeys[i]});
+							}
+							loc4.dataProvider = loc4List;
+						} else {
+							loc4.visible = false;
+						}
 						
-						
-					
 
 					}); // end search user callback
 				}
@@ -165,21 +170,12 @@
 				<fx:String>Princeton</fx:String>
 			</mx:ArrayList> 
 		</s:ComboBox>
-		<s:CheckBox includeIn="loggedin" x="37" y="289" label="New York, NY"
+		<s:CheckBox id="loc1" includeIn="loggedin" x="37" y="289" label="New York, NY"
 					fontFamily="Helvetica Neue Light"/>
-		<s:CheckBox includeIn="loggedin" x="37" y="309" label="Boston, MA" fontFamily="Helvetica Neue Light"/>
-		<s:CheckBox includeIn="loggedin" x="37" y="329" label="Washington, D.C." fontFamily="Helvetica Neue Light"/>
-		<s:ComboBox includeIn="loggedin" x="38" y="356" width="105" fontFamily="Helvetica Neue Light"
-					itemRenderer="educationRenderer">
-			<mx:ArrayList>
-				<fx:String>Cornell</fx:String>
-				<fx:String>MIT</fx:String>
-				<fx:String>Harvard</fx:String>
-				<fx:String>Dartmouth</fx:String>
-				<fx:String>Penn</fx:String>
-				<fx:String>Yale</fx:String>
-				<fx:String>Princeton</fx:String>
-			</mx:ArrayList> 
+		<s:CheckBox id="loc2" includeIn="loggedin" x="37" y="309" label="Boston, MA" fontFamily="Helvetica Neue Light"/>
+		<s:CheckBox id="loc3" includeIn="loggedin" x="37" y="329" label="Washington, D.C." fontFamily="Helvetica Neue Light"/>
+		<s:ComboBox id="loc4" includeIn="loggedin" x="38" y="356" width="105" fontFamily="Helvetica Neue Light">
+
 		</s:ComboBox>
 		<s:CheckBox includeIn="loggedin" x="37" y="441" label="Microsoft"
 					fontFamily="Helvetica Neue Light"/>
