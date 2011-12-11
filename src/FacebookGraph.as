@@ -50,6 +50,9 @@ private var  reqMutualsBatch:Batch;						//this is used to store the requests to
 private var searchUserCallback:Function;				//this is the callback to be called when the last asynchromous call completes
 //in searchUser()
 
+var myLocation:String;
+var myEducation:Array = new Array();
+
 
 protected function windowedapplication1_creationCompleteHandler(event:FlexEvent):void
 {
@@ -76,11 +79,27 @@ protected function loginHandler(success:Object,fail:Object):void
 		ACCESS_TOKEN = success.accessToken;
 		USER_ID = success.uid;
 		trace("login successful!");
+		FacebookDesktop.api("/me", function(success, failure):void {
+			myLocation = success.location.name;
+			for(var i=0;i<success.education.length;i++) {
+				myEducation.push(success.education[i].school.name);
+				trace("pushing "+success.education[i].school.name); 
+			}
+		});
 		this.currentState = "loggedin";
 		
 		//this is just a test
 		//searchUser("Jim", 0, dummySampleCallback);
-		
+		/*var topLoc;
+		var topEd:Array = new Array();
+		FacebookDesktop.api("/me", function(success, failure):void {
+			topLoc = success.data.location.name;
+			trace("toploc is "+topLoc);
+			for(var i=0;i<success.data.education.length;i++) {
+				topEd.push(success.data.education[i].school.name);
+				trace("pushing "+success.data.education[i].school.name); 
+			}
+		});*/
 	}
 }
 
