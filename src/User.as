@@ -1,6 +1,6 @@
 package 
 {
-	import mx.collections.ArrayList;
+	import mx.collections.*;
 
 	public class User
 	{
@@ -11,11 +11,11 @@ package
 		public var mutuals:int;
 		public var id:String;
 		
-		public var education:ArrayList;
+		public var education:ArrayCollection;
 		
 		public function User()
 		{
-			education = new ArrayList();
+			education = new ArrayCollection();
 		}
 	}
 	

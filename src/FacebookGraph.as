@@ -7,8 +7,6 @@ import com.facebook.graph.FacebookDesktop;
 import com.facebook.graph.data.Batch;
 import com.facebook.graph.net.FacebookBatchRequest;
 
-import mx.collections.ArrayCollection;
-
 import flash.events.*;
 
 import mx.collections.ArrayCollection;
@@ -19,8 +17,8 @@ import mx.events.*;
 import mx.events.FlexEvent;
 
 import spark.collections.Sort;
-import spark.components.Label;
 import spark.collections.SortField;
+import spark.components.Label;
 
 public var users:ArrayList = new ArrayList();			//holds the User objects that represent search results
 public var ids:ArrayList = new ArrayList();			//holds the ids of search results, used for internal book keeping
@@ -273,8 +271,8 @@ protected function makeLists()
 	//trace(nonZeroMutuals);
 	
 	//now sort the nonzero mutuals based on the mutuals 
-	var userSort:Sort = new Sort();
-	userSort.fields = [new SortField("mutuals", true)];					//the sort is based on the mutuals field
+	var userSort:spark.collections.Sort = new spark.collections.Sort();
+	userSort.fields = [new spark.collections.SortField("mutuals", true)];					//the sort is based on the mutuals field
 	nonZeroMutuals.sort = userSort;
 	nonZeroMutuals.refresh();
 	
