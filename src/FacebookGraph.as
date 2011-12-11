@@ -1,5 +1,8 @@
 
 // ActionScript file
+
+import User;
+
 import com.facebook.graph.FacebookDesktop;
 import com.facebook.graph.data.Batch;
 import com.facebook.graph.net.FacebookBatchRequest;
@@ -8,12 +11,15 @@ import mx.collections.ArrayCollection;
 
 import flash.events.*;
 
+import mx.collections.ArrayCollection;
 import mx.collections.ArrayList;
+import mx.controls.Label;
+import mx.core.UIComponent;
 import mx.events.*;
 import mx.events.FlexEvent;
-import User;
 
 import spark.collections.Sort;
+import spark.components.Label;
 import spark.collections.SortField;
 
 public var users:ArrayList = new ArrayList();			//holds the User objects that represent search results
@@ -174,6 +180,7 @@ private function readEducation(userBody:Object, user:User): void
 	if(userBody.education != null)
 	{
 		var j:int;
+		user.education = new ArrayCollection();
 		for(j = 0; j < userBody.education.length; j++)
 		{
 			var s:School = new School();
