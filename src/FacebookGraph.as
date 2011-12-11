@@ -4,6 +4,8 @@ import com.facebook.graph.FacebookDesktop;
 import com.facebook.graph.data.Batch;
 import com.facebook.graph.net.FacebookBatchRequest;
 
+import mx.collections.ArrayCollection;
+
 import flash.events.*;
 
 import mx.collections.ArrayList;
@@ -11,29 +13,44 @@ import mx.events.*;
 import mx.events.FlexEvent;
 import User;
 
+import spark.collections.Sort;
+import spark.collections.SortField;
 
 public var users:ArrayList = new ArrayList();			//holds the User objects that represent search results
+public var ids:ArrayList = new ArrayList();			//holds the ids of search results, used for internal book keeping
+public var friendIds:ArrayList = new ArrayList();
+//the four lists 
+public var friends:ArrayList = new ArrayList();
+public var innerCircle:ArrayList = new ArrayList();
+public var outerCirlce:ArrayList = new ArrayList();
+public var noMutuals:ArrayList = new ArrayList();
 
-private var ids:ArrayList = new ArrayList();			//holds the ids of search results, used for internal book keeping
+//the four pagination lists
+public var friendsPageIndex:ArrayList = new ArrayList();
+public var innerCirclePageIndex:ArrayList = new ArrayList();
+public var outerCircelpageIndex:ArrayList = new ArrayList();
+public var noMutualsPageIndex:ArrayList = new ArrayList();
 
-public static var APP_ID:String = "283561771688383";	//application id
+public static var APP_ID:String = "283561771688383";			//application id
 public static var ACCESS_TOKEN:String;					//the access token that is generated when the user logs in, used for makin batch requests
 
 
 private static var USER_ID:String = "";					//user id of the logged in user, might be needed for fetching his/her image 
+private static var LAST_OFFSET:int;
+private static var SEARCH_STRING:String = "";
 
 private var i:int;										//variable used in many loops, not a good idea to be made global, but bare with it
 private var userListStart:int;
 
 private var  reqMutualsBatch:Batch;						//this is used to store the requests to get mutuals
 private var searchUserCallback:Function;				//this is the callback to be called when the last asynchromous call completes
-														//in searchUser()
+//in searchUser()
 
 
 protected function windowedapplication1_creationCompleteHandler(event:FlexEvent):void
 {
 	// TODO Auto-generated method stub
-
+	
 	FacebookDesktop.init("283561771688383");
 	
 }
@@ -68,33 +85,6 @@ public function dummySampleCallback():void
 	trace(users);
 }
 
-//this method searches the facebook graph for given string (20 at a time)
-//and populates the users arraylist with Users objects
-//that hold the search results.
-//
-//This function always adds to the users list, so to get the previous results just traverse back up the users list
-//
-//usage sample: searchUser("Jim", 0, firstcallback) will fetch the first 20 results and the firstcallback method will be called
-//				searchUser("Jim", 1, secondcallback) will fetch the next 20 results and secondcallback will be called
-
-protected function searchUser(searchString:String, offset:int, callback:Function):void
-{
-	var offsetTxt:String;
-	offsetTxt = String(offset*20);
-	
-	//if offset is 0, it means it is a fresh search
-	//so clear the users list
-	if(offset == 0)
-	{
-		users = new ArrayList();
-	}
-	//assign the call back
-	searchUserCallback = callback;
-	
-	var searchMethod:String = "/search?q=" + searchString + "&type=user&format=json&limit=20&offset="+offsetTxt+"&";
-	FacebookDesktop.api(searchMethod, searchResultsHandler);
-	
-}
 
 //the handler to 
 protected function searchResultsHandler(success:Object, failure:Object):void
@@ -120,7 +110,7 @@ protected function searchResultsHandler(success:Object, failure:Object):void
 		
 		//for each user id, fetch the user data by submitting a batch request
 		for(i = 0; i < ids.length; i++)
-		//for(i=0;i<5;i++);
+			//for(i=0;i<5;i++);
 		{
 			
 			var getUserById:String = "/" + ids.getItemAt(i);
@@ -149,7 +139,7 @@ protected function userDataHandler(success:Object): void
 			var u:User = new User();
 			u.name = success.data[count].body.name;		//name is always there
 			
-			u.id = success.data[count].body.name;		//save the id
+			u.id = success.data[count].body.id;		//save the id
 			
 			
 			if(success.data[count].body.location)		//if location exists , add it
@@ -160,15 +150,16 @@ protected function userDataHandler(success:Object): void
 			{
 				u.location = "";
 			}
-						
+			
 			readEducation(success.data[count].body, u);	//read the education json obj
+			
 			
 			//add the new user to the list
 			users.addItem(u);
 			
 		}
 		
-		trace("users length: "+users.length);
+		trace(users.length);
 		
 		//now for each id make a request to get mutuals
 		var reqMutualsBatchRequest:FacebookBatchRequest = new FacebookBatchRequest(reqMutualsBatch, mutualFriendsHandler);
@@ -188,7 +179,7 @@ private function readEducation(userBody:Object, user:User): void
 			var s:School = new School();
 			s.name = userBody.education[j].school.name;		//school will always be there
 			s.type = userBody.education[j].type;
-						
+			
 			if( userBody.education[j].year != null )
 			{
 				s.year = userBody.education[j].year.name;		//year may always not be there..so check if this is null
@@ -197,8 +188,8 @@ private function readEducation(userBody:Object, user:User): void
 			{
 				s.year = "";
 			}
-						
-			//userBody.education.addItem(s);
+			
+			user.education.addItem(s);
 		}		
 	}
 }
@@ -206,29 +197,186 @@ private function readEducation(userBody:Object, user:User): void
 
 protected function mutualFriendsHandler(success:Object): void
 {
-	trace("entering mutual friends");
 	if(success.data)
 	{
 		for( i = userListStart; i < users.length; i++)
 		{
-			//if(success.data && success.data[i - userListStart] && success.data[i - userListStart].body && success.data[i - userListStart].body.data && success.data[i - userListStart].body.data.length) {
-				trace("success.data is "+success.data);
-				trace("element is "+success.data[i - userListStart]);
-				trace("body is :"+success.data[i - userListStart].body);
-				trace("body.data is: "+success.data[i - userListStart].body.data);
-				users.getItemAt(i).mutuals = success.data[i - userListStart].body.data.length;
-			//} else {
-			//	trace("something was undefined!");
-			//}
+			users.getItemAt(i).mutuals = success.data[i - userListStart].body.data.length;
 		}
 		
-		//the users list is completely populated at this point
-		//call the callback function
-		searchUserCallback();
+		
+		//at this point get ur friends..and populate a list
+		FacebookDesktop.api("/me/friends/", populateFriends);
 	}
 	
 }
 
+protected function populateFriends(success:Object, failure:Object):void
+{
+	if(success)
+	{
+		var j:int ;//= success.data.length;
+		for( j = 0; j < success.length; j++)
+		{
+			friendIds.addItem(success[j].id);
+		}
+	}
+	
+	//now we have the ids of friends...so i can tell..who are friends and who are not
+	makeLists();
+	
+}
+
+protected function makeLists()
+{
+	var j:int;
+	var nonFriends:ArrayCollection = new ArrayCollection();
+	for(j = 0; j < users.length; j++)
+	{
+		var id:String = users.getItemAt(j,0).id;
+		if(friendIds.getItemIndex(id) != -1)
+		{
+			//add this user to friend lists
+			friends.addItem(users.getItemAt(j,0));
+		}
+		else
+		{
+			nonFriends.addItem(users.getItemAt(j,0));
+		}
+	}
+	
+	//trace(friends);
+	//trace(nonFriends);
+	
+	//take the non friends..loop over , find the ones who have zero mutuals
+	//and move them to non mutuals list
+	var nonZeroMutuals:ArrayCollection = new ArrayCollection();
+	for(j = 0; j < nonFriends.length; j++)
+	{
+		if( nonFriends.getItemAt(j,0).mutuals == 0)
+		{
+			noMutuals.addItem(nonFriends.getItemAt(j,0));
+		}
+		else
+		{
+			nonZeroMutuals.addItem(nonFriends.getItemAt(j,0));
+		}
+	}
+	
+	//trace(nonZeroMutuals);
+	
+	//now sort the nonzero mutuals based on the mutuals 
+	var userSort:Sort = new Sort();
+	userSort.fields = [new SortField("mutuals", true)];					//the sort is based on the mutuals field
+	nonZeroMutuals.sort = userSort;
+	nonZeroMutuals.refresh();
+	
+	var innerCirceLimit:int = Math.ceil(0.33 * nonZeroMutuals.length);	//get the top 33% of nonzero mutuals that will be in the inner circle
+	
+	for(j = 0; j < innerCirceLimit; j++)
+	{
+		innerCircle.addItem(nonZeroMutuals.getItemAt(j,0));
+	}
+	for( ; j < nonZeroMutuals.length; j++)
+	{
+		outerCirlce.addItem(nonZeroMutuals.getItemAt(j,0));
+	}
+	
+	//at this point all the lists are correctly populated
+	//so set the new page incdices
+	
+	
+	trace("Friends" + friends);
+	trace("Inner Circle" + innerCircle);
+	trace("Outer Circle" + outerCirlce);
+	trace("No Mutuals" + noMutuals);
+	
+	updatePageIndex(friendsPageIndex, friends.length - 1);
+	updatePageIndex(innerCirclePageIndex, innerCircle.length - 1);
+	updatePageIndex(outerCircelpageIndex, outerCirlce.length - 1);
+	updatePageIndex(noMutualsPageIndex, noMutuals.length - 1);				
+	
+	//make the callback	
+	searchUserCallback();
+}
+//
+private function updatePageIndex(pageIndexList:ArrayList, newIndex:int): void
+{
+	//get the old index
+	if(pageIndexList.length == 0)
+	{
+		if(newIndex == -1)
+			pageIndexList.addItem({start:-1, end:-1});
+		else
+			pageIndexList.addItem({start:0, end:newIndex});
+	}
+	else
+	{
+		//get the last element
+		var lastElement:Object = pageIndexList.getItemAt(pageIndexList.length - 1);
+		
+		var oldIndex:int = lastElement.end;
+		
+		pageIndexList.addItem({start:oldIndex, end:newIndex});
+	}
+}
+
+//this method searches the facebook graph for given string (20 at a time)
+//and populates the users arraylist with Users objects
+//that hold the search results.
+//
+//This function always adds to the users list, so to get the previous results just traverse back up the users list
+//
+//usage sample: searchUser("Jim", 0, firstcallback) will fetch the first 20 results and the firstcallback method will be called
+//				searchUser("Jim", 1, secondcallback) will fetch the next 20 results and secondcallback will be called
+protected function searchUser(searchString:String, offset:int, callbackarg:Function):void
+{
+	LAST_OFFSET = offset;
+	
+	var offsetTxt:String;
+	offsetTxt = String(offset*20);
+	
+	//if offset is 0, it means it is a fresh search
+	//so clear the users list
+	if(offset == 0)
+	{
+		//
+		users.removeAll();
+		
+		//clear the existing circle Lists
+		innerCircle.removeAll();
+		outerCirlce.removeAll();
+		friends.removeAll();
+		noMutuals.removeAll();
+		
+		//clear all the pagination lists
+		innerCirclePageIndex.removeAll();
+		outerCircelpageIndex.removeAll();
+		friendsPageIndex.removeAll();
+		noMutualsPageIndex.removeAll();
+		
+		SEARCH_STRING = searchString;
+	}
+	
+	
+	//assign the argument callback
+	searchUserCallback = callbackarg;
+	
+	//create the search method
+	// type   = user
+	// format = json
+	// limit  = 20   .....we restrict to 20 because we use these results to create batch requests...and FB restricts the batch requests to 20
+	// offset = as provided by the user
+	var searchMethod:String = "/search?q=" + searchString + "&type=user&format=json&limit=20&offset="+offsetTxt+"&";
+	FacebookDesktop.api(searchMethod, searchResultsHandler);
+	
+}
+
+//returns the next results for the current search string
+protected function nextResults(callback:Function):void
+{
+	searchUser(SEARCH_STRING, LAST_OFFSET + 1, callback);
+}
 protected function login_clickHandler(event:MouseEvent):void
 {
 	// TODO Auto-generated method stub
@@ -246,9 +394,9 @@ protected function getStatusHandler(success:Object, failure:Object):void
 protected function login(event:MouseEvent):void
 {
 	FacebookDesktop.login(loginHandler, ["user_birthday", "read_stream",
-										 "user_location", "friends_location",
-										 "user_education_history", "friends_education_history",
-										 "user_hometown", "friends_hometown"]);
+		"user_location", "friends_location",
+		"user_education_history", "friends_education_history",
+		"user_hometown", "friends_hometown"]);
 }
 
 protected function logout(event:MouseEvent):void
