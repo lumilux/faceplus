@@ -114,7 +114,7 @@
 					circleArea.removeChildAt(0);
 				}
 				
-				noMutualsCircle = new CircleContainer(CENTER_X, CENTER_Y, 220);
+				noMutualsCircle = new CircleContainer(CENTER_X, CENTER_Y, 220, 0xFFFFFF, 0xFFFFFF);
 				circleArea.addChild(noMutualsCircle);
 				for(var i:int = 0; i < noMutuals.length; i++) {
 					noMutualsCircle.addItem(noMutuals.getItemAt(i));

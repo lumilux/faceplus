@@ -10,17 +10,20 @@ package {
 	
 	public class CircleContainer extends UIComponent {
 		public var radius:int;
-		public var cColor:uint = 0xEEEEEE;
+		public var cColor:uint;
 		private var cv:Canvas;
 		private var circle:Shape;
+		private var borderColor:uint;
 		[Bindable]
 		private var items:ArrayList;
 		
-		public function CircleContainer(x:int, y:int, radius:int) {
+		public function CircleContainer(x:int, y:int, radius:int, color:uint = 0xEEEEEE, borderCol:uint = 0x6666FF) {
 			super();
 			this.x = x;
 			this.y = y;
 			this.radius = radius;
+			this.cColor = color;
+			this.borderColor = borderCol;
 			items = new ArrayList();
 			//items.addEventListener(CollectionEvent.COLLECTION_CHANGE, itemsChangeListener);
 			this.draw();
@@ -41,7 +44,7 @@ package {
 		public function draw() {
 			this.circle = new Shape();
 			circle.graphics.beginFill(cColor);
-			circle.graphics.lineStyle(1, 0x6666FF, 0.5);
+			circle.graphics.lineStyle(1, borderColor, 0.5);
 			circle.graphics.drawCircle(this.x, this.y, this.radius);
 			circle.graphics.endFill();
 			addChild(circle);
