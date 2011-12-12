@@ -50,6 +50,7 @@ private var  reqMutualsBatch:Batch;						//this is used to store the requests to
 private var searchUserCallback:Function;				//this is the callback to be called when the last asynchromous call completes
 //in searchUser()
 
+var USER_NAME:String;
 var myLocation:String;
 var myEducation:Array = new Array();
 var myWorkplaces:Array = new Array();
@@ -58,7 +59,7 @@ var myWorkplaces:Array = new Array();
 protected function windowedapplication1_creationCompleteHandler(event:FlexEvent):void
 {
 	// TODO Auto-generated method stub
-	
+
 	FacebookDesktop.init("283561771688383");
 	
 }
@@ -79,6 +80,7 @@ protected function loginHandler(success:Object,fail:Object):void
 		//set the access token and the user id for future use
 		ACCESS_TOKEN = success.accessToken;
 		USER_ID = success.uid;
+		USER_NAME = success.user.name;
 		trace("login successful!");
 		FacebookDesktop.api("/me", function(success, failure):void {
 			myLocation = success.location ? success.location.name : null;
@@ -94,7 +96,11 @@ protected function loginHandler(success:Object,fail:Object):void
 				}
 			}
 		});
+		
 		this.currentState = "loggedin";
+		searchbox.text = "Who do you want to find?";
+		nextResultsButton.visible = false;
+		filtersgroup.visible = false;
 		
 		//this is just a test
 		//searchUser("Jim", 0, dummySampleCallback);
@@ -471,6 +477,13 @@ protected function logout(event:MouseEvent):void
 	// TODO Auto-generated method stub
 	FacebookDesktop.logout();
 	this.currentState="loggedout";
+	
+	var clearMe:Array = [circleArea, workgroup, edgroup, locgroup];
+	for(var i=0;i<clearMe.length;i++) {
+		while(clearMe[i].numChildren > 0) {
+			clearMe[i].removeChildAt(0);
+		}
+	}
 	
 }
 

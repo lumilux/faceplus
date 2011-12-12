@@ -50,8 +50,6 @@
 			}
 			
 			protected function searchCallback() { // CALLBACK FROM SEARCH
-				spinner.visible = false;
-				nextResultsButton.visible = true;
 				var fd:spark.effects.Fade = new Fade(filtersgroup);
 				if(filtersgroup.visible == false) {
 					fd.alphaFrom = 0;
@@ -114,37 +112,59 @@
 					circleArea.removeChildAt(0);
 				}
 				
-				noMutualsCircle = new CircleContainer(CENTER_X, CENTER_Y, 220, 0xFFFFFF, 0xFFFFFF);
+				noMutualsCircle = new CircleContainer(CENTER_X, CENTER_Y, 240, 0xFFFFFF, 0xFFFFFF);
 				circleArea.addChild(noMutualsCircle);
 				for(var i:int = 0; i < noMutuals.length; i++) {
 					noMutualsCircle.addItem(noMutuals.getItemAt(i));
 				}
 				noMutualsCircle.drawItems();
 				
-				outerCircle = new CircleContainer(CENTER_X, CENTER_Y, 180);
+				outerCircle = new CircleContainer(CENTER_X, CENTER_Y, 190);
 				circleArea.addChild(outerCircle);
 				for(var i:int = 0; i < outer.length; i++) {
 					outerCircle.addItem(outer.getItemAt(i));
 				}
 				outerCircle.drawItems();
 				
-				innerCircle = new CircleContainer(CENTER_X, CENTER_Y, 140);
+				innerCircle = new CircleContainer(CENTER_X, CENTER_Y, 130);
 				circleArea.addChild(innerCircle);
 				for(var i:int = 0; i < inner.length; i++) {
 					innerCircle.addItem(inner.getItemAt(i));
 				}
 				innerCircle.drawItems();
 				
-				friendCircle = new CircleContainer(CENTER_X, CENTER_Y, 100);
+				friendCircle = new CircleContainer(CENTER_X, CENTER_Y, 70);
 				circleArea.addChild(friendCircle);
 				for(var i:int = 0; i < friends.length; i++) {
 					friendCircle.addItem(friends.getItemAt(i));
 				}
 				friendCircle.drawItems();
 				
+				// adding pic to center
+				var profilePic:Image = new Image();
+				profilePic.source = "http://graph.facebook.com/"+USER_ID+"/picture";
+				profilePic.x = circleArea.width/2 - 50;
+				profilePic.y = circleArea.height/2 - 50;
+				circleArea.addChild(profilePic);
+				
+				var myName:spark.components.Label = new spark.components.Label();
+				myName.text = USER_NAME.replace(" ", "\n");
+				myName.x = circleArea.width/2 - 50;
+				myName.y = circleArea.height/2;
+				myName.setStyle("fontFamily", "Helvetica Neue");
+				myName.setStyle("fontSize", 16);
+				myName.setStyle("textAlign", "center");
+				circleArea.addChild(myName);
+				
+				
+				spinner.visible = false;
+				nextResultsButton.enabled = true;
+				nextResultsButton.visible = true;
 			}
 			
 			protected function nextResultHandler(event:MouseEvent):void {
+				spinner.visible = true;
+				nextResultsButton.enabled = false;
 				nextResults(searchCallback);
 			}
 			
@@ -371,7 +391,7 @@
 			
 		</mx:Canvas>
 	</s:Group>
-	<mx:Canvas id="circleArea" width="620" height="500" x="200" y="60">
+	<mx:Canvas id="circleArea" width="620" height="500" x="200" y="60" includeIn="loggedin">
 		
 
 	</mx:Canvas>
