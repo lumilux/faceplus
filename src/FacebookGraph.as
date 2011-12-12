@@ -52,6 +52,7 @@ private var searchUserCallback:Function;				//this is the callback to be called 
 
 var myLocation:String;
 var myEducation:Array = new Array();
+var myWorkplaces:Array = new Array();
 
 
 protected function windowedapplication1_creationCompleteHandler(event:FlexEvent):void
@@ -80,26 +81,24 @@ protected function loginHandler(success:Object,fail:Object):void
 		USER_ID = success.uid;
 		trace("login successful!");
 		FacebookDesktop.api("/me", function(success, failure):void {
-			myLocation = success.location.name;
-			for(var i=0;i<success.education.length;i++) {
-				myEducation.push(success.education[i].school.name);
-				trace("pushing "+success.education[i].school.name); 
+			myLocation = success.location ? success.location.name : null;
+			if(success.education) {
+				for(var i=0;i<success.education.length;i++) {
+					myEducation.push(success.education[i].school.name);
+				}
+			}
+			if(success.work) {
+				for(var i=0;i<success.work.length;i++) {
+					myWorkplaces.push(success.work[i].employer.name);
+					trace("pushing workplace for me "+success.work[i].employer.name);
+				}
 			}
 		});
 		this.currentState = "loggedin";
 		
 		//this is just a test
 		//searchUser("Jim", 0, dummySampleCallback);
-		/*var topLoc;
-		var topEd:Array = new Array();
-		FacebookDesktop.api("/me", function(success, failure):void {
-			topLoc = success.data.location.name;
-			trace("toploc is "+topLoc);
-			for(var i=0;i<success.data.education.length;i++) {
-				topEd.push(success.data.education[i].school.name);
-				trace("pushing "+success.data.education[i].school.name); 
-			}
-		});*/
+		
 	}
 }
 
@@ -250,8 +249,11 @@ protected function mutualFriendsHandler(success:Object): void
 {
 	if(success.data)
 	{
-		for( i = userListStart; i < users.length; i++)
+		for( i = userListStart; (i-userListStart) < success.data.length; i++)
 		{
+			trace("i is "+i+" and i-userliststart is "+(i-userListStart));
+			trace("body: "+success.data[i - userListStart].body);
+			trace("body.data: "+success.data[i - userListStart].body.data);
 			users.getItemAt(i).mutuals = success.data[i - userListStart].body.data.length;
 		}
 		
@@ -282,7 +284,14 @@ protected function makeLists(): void
 {
 	var j:int;
 	var nonFriends:ArrayCollection = new ArrayCollection();
-	for(j = 0; j < users.length; j++)
+	
+	// reset everything
+	friends = new ArrayList();
+	outer = new ArrayList();
+	inner = new ArrayList();
+	noMutuals = new ArrayList();
+	
+	for(j = userListStart; j < users.length; j++)
 	{
 		var id:String = users.getItemAt(j,0).id;
 		if(friendIds.getItemIndex(id) != -1)
@@ -451,10 +460,10 @@ protected function getStatusHandler(success:Object, failure:Object):void
 protected function login(event:MouseEvent):void
 {
 	FacebookDesktop.login(loginHandler, ["user_birthday", "read_stream",
-					     "user_location", "friends_location",
-					     "user_education_history", "friends_education_history",
-					     "user_work_history","friends_work_history",
-					     "user_hometown", "friends_hometown"]);
+		"user_location", "friends_location",
+		"user_education_history", "friends_education_history",
+		"user_work_history","friends_work_history",
+		"user_hometown", "friends_hometown"]);
 }
 
 protected function logout(event:MouseEvent):void
