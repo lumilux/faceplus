@@ -12,6 +12,7 @@
 			
 			import mx.collections.*;
 			
+			import spark.components.*;
 			import spark.effects.Fade;
 			
 			include "FacebookGraph.as";
@@ -19,9 +20,13 @@
 			var beginType:Boolean = false; // toggled once when the user clicks the search box
 			
 			// global vars for the circles
+			var noMutualsCircle:CircleContainer;
 			var outerCircle:CircleContainer;
 			var innerCircle:CircleContainer;
 			var friendCircle:CircleContainer;
+			
+			var CENTER_X = 140;
+			var CENTER_Y = 120;
 			
 			// dummy function for testing
 			protected function dummyLogin(event:MouseEvent):void {
@@ -40,139 +45,170 @@
 				
 				if(event.keyCode == 13) {
 					spinner.visible = true;
-					searchUser(searchbox.text, 0, function() { // CALLBACK FROM SEARCH
-						spinner.visible = false;
-						var fd:spark.effects.Fade = new Fade(filtersgroup);
-						if(filtersgroup.visible == false) {
-							fd.alphaFrom = 0;
-							fd.alphaTo = 1;
-							fd.duration = 1500;
-							fd.play();
-						}
-						
-						// loop through resultset and add configure filters
-						var locations:Dictionary = new Dictionary();
-						var educations:Dictionary = new Dictionary();
-						
-						var locSize = 0;
-						var edsSize = 0;
-						trace("users! is "+users);
-						for(var i=0;i<users.length;i++) {
-							var loc = users.getItemAt(i).location;
-							var eds = users.getItemAt(i).education;
-							
-							trace(users.getItemAt(i).name+": "+loc+", "+users.getItemAt(i).network+", "+eds);
-							if(loc != "") {
-								if(!locations[loc]) {
-									trace("creating new bucket for key "+loc);
-									locations[loc] = new ArrayList();
-									locSize++;
-								}
-								locations[loc].addItem(users.getItemAt(i));
-								trace(locations[loc]+" and "+locations.length);
-							}
-							if(eds != null) {
-								for(var j=0;j<eds.length;j++) {
-									if(!educations[eds[j].name]) {
-										trace("creating new bucket for key "+eds[j].name);
-										educations[eds[j].name] = new ArrayList();
-										edsSize++;
-									}
-									educations[eds[j].name].addItem(users.getItemAt(i));
-								}
-							}
-							
-						}
-						
-						trace("after loop educations is "+educations);
-						
-						var sortedKeysLoc:Array = rankSort(locations, locSize);
-						trace("sortedkeys location: "+sortedKeysLoc+", length"+sortedKeysLoc.length);
-						updateFilterDisplays(sortedKeysLoc, locgroup, [myLocation]);
-						
-						updateFilterDisplays(rankSort(educations, edsSize), edgroup, myEducation);
-						
-						// reset circleArea and display results in circles
-						while(circleArea.numChildren > 0) {
-							circleArea.removeChildAt(0);
-						}
-						
-						outerCircle = new CircleContainer(180, 100, 200);
-						circleArea.addChild(outerCircle);
-						for(var i:int = 0; i < outer.length; i++) {
-							outerCircle.addItem(outer.getItemAt(i));
-						}
-						outerCircle.drawItems();
-						
-						innerCircle = new CircleContainer(180, 100, 150);
-						circleArea.addChild(innerCircle);
-						for(var i:int = 0; i < inner.length; i++) {
-							innerCircle.addItem(inner.getItemAt(i));
-						}
-						innerCircle.drawItems();
-						
-						friendCircle = new CircleContainer(180, 100, 100);
-						circleArea.addChild(friendCircle);
-						for(var i:int = 0; i < friends.length; i++) {
-							friendCircle.addItem(friends.getItemAt(i));
-						}
-						friendCircle.drawItems();
-						
-					}); // end search user callback
+					searchUser(searchbox.text, 0, searchCallback); // end search user callback
 				}
 			}
 			
+			protected function searchCallback() { // CALLBACK FROM SEARCH
+				spinner.visible = false;
+				nextResultsButton.visible = true;
+				var fd:spark.effects.Fade = new Fade(filtersgroup);
+				if(filtersgroup.visible == false) {
+					fd.alphaFrom = 0;
+					fd.alphaTo = 1;
+					fd.duration = 1500;
+					fd.play();
+				}
+				
+				// loop through resultset and add configure filters
+				var locations:Dictionary = new Dictionary();
+				var educations:Dictionary = new Dictionary();
+				var workplaces:Dictionary = new Dictionary();
+				
+				var locSize = 0;
+				var edsSize = 0;
+				var workSize = 0;
+				for(var i=0;i<users.length;i++) {
+					var loc = users.getItemAt(i).location;
+					var eds = users.getItemAt(i).education;
+					var works = users.getItemAt(i).work;
+					
+					if(loc != "") {
+						if(!locations[loc]) {
+							locations[loc] = new ArrayList();
+							locSize++;
+						}
+						locations[loc].addItem(users.getItemAt(i));
+						trace(locations[loc]+" and "+locations.length);
+					}
+					if(eds != null) {
+						for(var j=0;j<eds.length;j++) {
+							if(!educations[eds[j].name]) {
+								educations[eds[j].name] = new ArrayList();
+								edsSize++;
+							}
+							educations[eds[j].name].addItem(users.getItemAt(i));
+						}
+					}
+					if(works != null) {
+						for(var j=0;j<works.length;j++) {
+							if(!workplaces[works[j].employerName]) {
+								workplaces[works[j].employerName] = new ArrayList();
+								workSize++;
+							}
+							workplaces[works[j].employerName].addItem(users.getItemAt(i));
+						}
+					}
+					
+				}
+				
+				var sortedKeysLoc:Array = rankSort(locations, locSize);
+				updateFilterDisplays(sortedKeysLoc, locgroup, (myLocation == null ? [] : [myLocation]));
+				
+				updateFilterDisplays(rankSort(educations, edsSize), edgroup, myEducation);
+				updateFilterDisplays(rankSort(workplaces, workSize), workgroup, myWorkplaces);
+				
+				
+				// reset circleArea and display results in circles
+				while(circleArea.numChildren > 0) {
+					circleArea.removeChildAt(0);
+				}
+				
+				noMutualsCircle = new CircleContainer(CENTER_X, CENTER_Y, 220);
+				circleArea.addChild(noMutualsCircle);
+				for(var i:int = 0; i < noMutuals.length; i++) {
+					noMutualsCircle.addItem(noMutuals.getItemAt(i));
+				}
+				noMutualsCircle.drawItems();
+				
+				outerCircle = new CircleContainer(CENTER_X, CENTER_Y, 180);
+				circleArea.addChild(outerCircle);
+				for(var i:int = 0; i < outer.length; i++) {
+					outerCircle.addItem(outer.getItemAt(i));
+				}
+				outerCircle.drawItems();
+				
+				innerCircle = new CircleContainer(CENTER_X, CENTER_Y, 140);
+				circleArea.addChild(innerCircle);
+				for(var i:int = 0; i < inner.length; i++) {
+					innerCircle.addItem(inner.getItemAt(i));
+				}
+				innerCircle.drawItems();
+				
+				friendCircle = new CircleContainer(CENTER_X, CENTER_Y, 100);
+				circleArea.addChild(friendCircle);
+				for(var i:int = 0; i < friends.length; i++) {
+					friendCircle.addItem(friends.getItemAt(i));
+				}
+				friendCircle.drawItems();
+				
+			}
+			
+			protected function nextResultHandler(event:MouseEvent):void {
+				nextResults(searchCallback);
+			}
+			
 			protected function handleFilter(event:Event):void {
-				var allLocs:Array = locgroup.getChildren();
+				var allFilters:Array = locgroup.getChildren();
 				for(var i=0;i<edgroup.getChildren().length;i++) {
-					allLocs.push(edgroup.getChildAt(i));
+					allFilters.push(edgroup.getChildAt(i));
 				}
-				for(var i=0;i<allLocs.length;i++) {
-					trace("testing allloc "+allLocs[i].label);
+				for(var i=0;i<workgroup.getChildren().length;i++) {
+					allFilters.push(workgroup.getChildAt(i));
 				}
+				for(var i=0;i<allFilters.length;i++) {
+					if(getQualifiedClassName(allFilters[i]) != "spark.components::CheckBox") {
+						allFilters.splice(i, 1);
+					}
+				}
+				
 				var atLeastOneSelected:Boolean = false; // if no filter has been selected, display everything
-				for(var i=0;i<allLocs.length;i++) {
-					if(allLocs[i].selected) {
-						trace("at least one selected!");
+				for(var i=0;i<allFilters.length;i++) {
+					if(allFilters[i].selected) {
 						atLeastOneSelected = true;
 						break;
 					}
 				}				
 				if(atLeastOneSelected) {
 					bigloop: for(var i=0;i<circleArea.numChildren;i++) {
-						//trace("qualified classname is "+getQualifiedClassName(circleArea.getChildAt(i)));
 						if(getQualifiedClassName(circleArea.getChildAt(i)) == "spark.components::Label") {
 							var currName = (circleArea.getChildAt(i) as spark.components.Label).text.replace("\n", " "); // the current person we're testing
 							// loop through users. when we come across currName, if he's not part of the location/ed/workplace, then we hide the current child
-							for(var j=0;j<users.length;j++) {
+							innerloop: for(var j=0;j<users.length;j++) {
 								var currUser:User = users.getItemAt(j) as User;
-								//trace("currName is "+currName+" and curruser.name is "+currUser.name);
 								if(currUser.name == currName) {
 									var hideThisUser:Boolean = true;
-									for(var k=0;k<allLocs.length;k++) {
+									for(var k=0;k<allFilters.length;k++) {
+										
 										// check to see if our current filter matches any of this person's properties
 										//trace("currchild is "+i+" curruser.location is "+currUser.location+" and label is "+allLocs[k].label+" and selected is "+allLocs[k].selected);
-										if(currUser.location == allLocs[k].label && allLocs[k].selected) {
-											trace("INSIDE HERE!!!! iteration "+k+", "+i);
+										
+										if(currUser.location == allFilters[k].label && allFilters[k].selected) {
 											hideThisUser = false;
-											trace("hidethisuser is "+hideThisUser);
 										} else {
-											// gotta loop through education array
+											// gotta loop through education and work array
 											for(var m=0;m<currUser.education.length;m++) {
-												if(currUser.education[m].name == allLocs[k].label && allLocs[k].selected) {
+												if(currUser.education[m].name == allFilters[k].label && allFilters[k].selected) {
+													hideThisUser = false;
+												}
+											}
+											for(var m=0;m<currUser.work.length;m++) {
+												if(currUser.work[m].employerName == allFilters[k].label && allFilters[k].selected) {
 													hideThisUser = false;
 												}
 											}
 										}
+										
 									}
 									trace("child "+i+" has label "+currName+". we are testing against user "+currUser.name+" who has location "+currUser.location+". hidethisuser is "+hideThisUser);
-									if(hideThisUser == true) {
-										trace("hiding child "+i+" because hideThisUser is "+hideThisUser);
-										circleArea.getChildAt(i).visible = false;
-									} else {
-										trace("we are NOT hiding child "+i);
+									if(hideThisUser == false) {
+										circleArea.getChildAt(i).visible = true;
+										break innerloop;
 									}
-									break; // once we've encountered one.. break out
+									if(hideThisUser == true) {
+										circleArea.getChildAt(i).visible = false;
+									}
+									//break; // once we've encountered one.. break out
 								} // end check to find the current label's User
 							} // end loop through users
 						} //end check to see if current child is a label 
@@ -225,25 +261,31 @@
 				}				
 				
 				var currY = 0;
-				for(var i=0;i<defaults.length;i++) {
-					var cb:CheckBox = new CheckBox();
-					cb.y = currY;
-					cb.label = defaults[i];
-					cb.setStyle("fontFamily", "Helvetica Neue Light");
-					cb.addEventListener(MouseEvent.CLICK, handleFilter);
-					group.addChild(cb);
-					currY += 20;
-				}
-				
-				for(var i=0;i<ordering.length;i++) {
-					if(defaults.indexOf(ordering[i]) == -1) {
+				if(ordering.length == 0) {
+					var lab:spark.components.Label = new spark.components.Label();
+					lab.text = "Not enough information to filter!";
+					group.addChild(lab);
+				} else {
+					for(var i=0;i<defaults.length;i++) {
 						var cb:CheckBox = new CheckBox();
 						cb.y = currY;
-						cb.label = ordering[i];
+						cb.label = defaults[i];
 						cb.setStyle("fontFamily", "Helvetica Neue Light");
 						cb.addEventListener(MouseEvent.CLICK, handleFilter);
 						group.addChild(cb);
 						currY += 20;
+					}
+					
+					for(var i=0;i<ordering.length;i++) {
+						if(defaults.indexOf(ordering[i]) == -1) {
+							var cb:CheckBox = new CheckBox();
+							cb.y = currY;
+							cb.label = ordering[i];
+							cb.setStyle("fontFamily", "Helvetica Neue Light");
+							cb.addEventListener(MouseEvent.CLICK, handleFilter);
+							group.addChild(cb);
+							currY += 20;
+						}
 					}
 				}
 			}
@@ -309,24 +351,31 @@
 		<mx:Canvas id="locgroup" x="37" y="290" width="180" height="100" horizontalScrollPolicy="off">
 			
 		</mx:Canvas>
-		<s:CheckBox includeIn="loggedin" x="37" y="441" label="Microsoft"
-					fontFamily="Helvetica Neue Light"/>
+		<!--<s:CheckBox includeIn="loggedin" x="37" y="441" label="Microsoft"
+		fontFamily="Helvetica Neue Light"/>
 		<s:CheckBox includeIn="loggedin" x="37" y="461" label="Google" fontFamily="Helvetica Neue Light"/>
 		<s:CheckBox includeIn="loggedin" x="37" y="481" label="Apple" fontFamily="Helvetica Neue Light"/>
 		<s:ComboBox includeIn="loggedin" x="38" y="508" width="105" fontFamily="Helvetica Neue Light"
-					itemRenderer="educationRenderer">
-			<mx:ArrayList>
-				<fx:String>Cornell</fx:String>
-				<fx:String>MIT</fx:String>
-				<fx:String>Harvard</fx:String>
-				<fx:String>Dartmouth</fx:String>
-				<fx:String>Penn</fx:String>
-				<fx:String>Yale</fx:String>
-				<fx:String>Princeton</fx:String>
-			</mx:ArrayList> 
-		</s:ComboBox>
+		itemRenderer="educationRenderer">
+		<mx:ArrayList>
+		<fx:String>Cornell</fx:String>
+		<fx:String>MIT</fx:String>
+		<fx:String>Harvard</fx:String>
+		<fx:String>Dartmouth</fx:String>
+		<fx:String>Penn</fx:String>
+		<fx:String>Yale</fx:String>
+		<fx:String>Princeton</fx:String>
+		</mx:ArrayList> 
+		</s:ComboBox>-->
+		<mx:Canvas id="workgroup" x="37" y="440" width="180" height="100" horizontalScrollPolicy="off">
+			
+		</mx:Canvas>
 	</s:Group>
-	<mx:Canvas id="circleArea" width="600" height="500" x="200" y="100">
+	<mx:Canvas id="circleArea" width="620" height="500" x="200" y="60">
 		
+
 	</mx:Canvas>
+	<s:Button id="nextResultsButton" label=">>" click="nextResultHandler(event)" x="780" y="60" width="50" includeIn="loggedin" visible="false">
+		
+	</s:Button>
 </s:WindowedApplication>
