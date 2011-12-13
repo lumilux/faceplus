@@ -135,14 +135,14 @@
 				// adding pic to center
 				var profilePic:Image = new Image();
 				profilePic.source = "http://graph.facebook.com/"+USER_ID+"/picture";
-				profilePic.x = circleArea.width/2 - 50;
-				profilePic.y = circleArea.height/2 - 50;
+				profilePic.x = circleArea.width/2 - 25;
+				profilePic.y = circleArea.height/2 - 100;
 				circleArea.addChild(profilePic);
 				
 				var myName:spark.components.Label = new spark.components.Label();
 				myName.text = USER_NAME.replace(" ", "\n");
-				myName.x = circleArea.width/2 - 50;
-				myName.y = circleArea.height/2;
+				myName.x = circleArea.width/2 - 25;
+				myName.y = circleArea.height/2 - 40;
 				myName.setStyle("fontFamily", "Helvetica Neue");
 				myName.setStyle("fontSize", 16);
 				myName.setStyle("textAlign", "center");

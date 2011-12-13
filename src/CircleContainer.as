@@ -6,7 +6,7 @@ package {
 	import mx.core.UIComponent;
 	import mx.events.CollectionEvent;
 	
-	import spark.components.Label;
+	import spark.components.*;
 	
 	public class CircleContainer extends UIComponent {
 		public var radius:int;
@@ -66,9 +66,19 @@ package {
 		}
 		
 		private function drawUser(user:User, x:int, y:int) {
+			var OFFSET = 15;
+			var profilePic:Image = new Image();
+			profilePic.source = "http://graph.facebook.com/"+user.id+"/picture";
+			profilePic.move(this.x + x - OFFSET, this.y + y - 15 - OFFSET);
+			profilePic.width = 30;
+			profilePic.height = 30;
+			this.drawnElements.addItem(profilePic);
+			this.parent.addChild(profilePic);
+			
 			var name_lbl:Label = new Label();
 			name_lbl.text = user.name.replace(" ", "\n");
-			name_lbl.move(this.x + x, this.y + y);
+			name_lbl.move(this.x + x - name_lbl.width/2 - OFFSET, this.y + y + 22 - OFFSET);
+			name_lbl.setStyle("textAlign", "center");
 			this.drawnElements.addItem(name_lbl);
 			this.parent.addChild(name_lbl);
 		}
