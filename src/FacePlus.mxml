@@ -2,7 +2,7 @@
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
 					   xmlns:s="library://ns.adobe.com/flex/spark" 
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
-					   width="860" height="600" creationComplete="windowedapplication1_creationCompleteHandler(event)" xmlns:controls="controls.*" xmlns:local="*" width.loggedout="1200" height.loggedout="800">
+					   width="1200" height="800" creationComplete="windowedapplication1_creationCompleteHandler(event)" xmlns:controls="controls.*" xmlns:local="*" width.loggedout="1200" height.loggedout="800">
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
@@ -24,9 +24,6 @@
 			var outerCircle:CircleContainer;
 			var innerCircle:CircleContainer;
 			var friendCircle:CircleContainer;
-			
-			var CENTER_X = 200;
-			var CENTER_Y = 150;
 			
 			// dummy function for testing
 			protected function dummyLogin(event:MouseEvent):void {
@@ -112,22 +109,26 @@
 					circleArea.removeChildAt(0);
 				}
 				
-				noMutualsCircle = new CircleContainer(CENTER_X, CENTER_Y, 240, 0xFFFFFF, 0xFFFFFF);
+				var CENTER_X = circleArea.width / 2 - 250;
+				var CENTER_Y = circleArea.height / 2 - 180;
+				trace(circleArea.width+" "+CENTER_X+" "+circleArea.height+" "+CENTER_Y);
+				
+				noMutualsCircle = new CircleContainer(CENTER_X, CENTER_Y, 360, 0xFFFFFF, 0xFFFFFF);
 				circleArea.addChild(noMutualsCircle);
 				noMutualsCircle.addAll(noMutuals);
 				noMutualsCircle.drawItems();
 				
-				outerCircle = new CircleContainer(CENTER_X, CENTER_Y, 190);
+				outerCircle = new CircleContainer(CENTER_X, CENTER_Y, 290);
 				circleArea.addChild(outerCircle);
 				outerCircle.addAll(outer);
 				outerCircle.drawItems();
 				
-				innerCircle = new CircleContainer(CENTER_X, CENTER_Y, 130);
+				innerCircle = new CircleContainer(CENTER_X, CENTER_Y, 190);
 				circleArea.addChild(innerCircle);
 				innerCircle.addAll(inner);
 				innerCircle.drawItems();
 				
-				friendCircle = new CircleContainer(CENTER_X, CENTER_Y, 70);
+				friendCircle = new CircleContainer(CENTER_X, CENTER_Y, 100);
 				circleArea.addChild(friendCircle);
 				friendCircle.addAll(friends);
 				friendCircle.drawItems();
@@ -136,13 +137,13 @@
 				var profilePic:Image = new Image();
 				profilePic.source = "http://graph.facebook.com/"+USER_ID+"/picture";
 				profilePic.x = circleArea.width/2 - 25;
-				profilePic.y = circleArea.height/2 - 100;
+				profilePic.y = circleArea.height/2 - 60;
 				circleArea.addChild(profilePic);
 				
 				var myName:spark.components.Label = new spark.components.Label();
 				myName.text = USER_NAME.replace(" ", "\n");
 				myName.x = circleArea.width/2 - 25;
-				myName.y = circleArea.height/2 - 40;
+				myName.y = circleArea.height/2;
 				myName.setStyle("fontFamily", "Helvetica Neue");
 				myName.setStyle("fontSize", 16);
 				myName.setStyle("textAlign", "center");
@@ -182,54 +183,37 @@
 					}
 				}				
 				if(atLeastOneSelected) {
-					bigloop: for(var i=0;i<circleArea.numChildren;i++) {
-						if(getQualifiedClassName(circleArea.getChildAt(i)) == "spark.components::Label") {
-							var currName = (circleArea.getChildAt(i) as spark.components.Label).text.replace("\n", " "); // the current person we're testing
-							// loop through users. when we come across currName, if he's not part of the location/ed/workplace, then we hide the current child
-							innerloop: for(var j=0;j<users.length;j++) {
-								var currUser:User = users.getItemAt(j) as User;
-								if(currUser.name == currName) {
-									var hideThisUser:Boolean = true;
-									for(var k=0;k<allFilters.length;k++) {
-										
-										// check to see if our current filter matches any of this person's properties
-										//trace("currchild is "+i+" curruser.location is "+currUser.location+" and label is "+allLocs[k].label+" and selected is "+allLocs[k].selected);
-										
-										if(currUser.location == allFilters[k].label && allFilters[k].selected) {
-											hideThisUser = false;
-										} else {
-											// gotta loop through education and work array
-											for(var m=0;m<currUser.education.length;m++) {
-												if(currUser.education[m].name == allFilters[k].label && allFilters[k].selected) {
-													hideThisUser = false;
-												}
-											}
-											for(var m=0;m<currUser.work.length;m++) {
-												if(currUser.work[m].employerName == allFilters[k].label && allFilters[k].selected) {
-													hideThisUser = false;
-												}
-											}
-										}
-										
+					trace("users: "+users.length);
+					for(var i:int = 0; i < users.length; i++) {
+						var user = users.getItemAt(i) as User;
+						var hideThisUser:Boolean = true;
+						for each(var filter:Object in allFilters) {
+							if(user.location == filter.label && filter.selected) {
+								hideThisUser = false;
+							} else {
+								// gotta loop through education and work array
+								for each(var edu:Object in user.education) {
+									if(edu.name == filter.label && filter.selected) {
+										hideThisUser = false;
 									}
-									trace("child "+i+" has label "+currName+". we are testing against user "+currUser.name+" who has location "+currUser.location+". hidethisuser is "+hideThisUser);
-									if(hideThisUser == false) {
-										circleArea.getChildAt(i).visible = true;
-										break innerloop;
+								}
+								for each(var work:Object in user.work) {
+									if(work.employerName == filter.label && filter.selected) {
+										hideThisUser = false;
 									}
-									if(hideThisUser == true) {
-										circleArea.getChildAt(i).visible = false;
-									}
-									//break; // once we've encountered one.. break out
-								} // end check to find the current label's User
-							} // end loop through users
-						} //end check to see if current child is a label 
-					} // end loop through children
-				} else { // if nothing is selected, display 'em all
-					for(var i=0;i<circleArea.numChildren;i++) {
-						if(getQualifiedClassName(circleArea.getChildAt(i)) == "spark.components::Label") {
-							circleArea.getChildAt(i).visible = true;
+								}
+							}
+							if(hideThisUser) {
+								user.hide();
+							} else {
+								user.show();
+							}
 						}
+					}
+				} else {
+					for(var i:int = 0; i < users.length; i++) {
+						var user = users.getItemAt(i) as User;
+						user.show();
 					}
 				}
 			}
@@ -383,7 +367,7 @@
 			
 		</mx:Canvas>
 	</s:Group>
-	<mx:Canvas id="circleArea" width="800" height="700" x="220" y="100" includeIn="loggedin">
+	<mx:Canvas id="circleArea" width="1000" height="700" x="220" y="100" includeIn="loggedin">
 		
 
 	</mx:Canvas>

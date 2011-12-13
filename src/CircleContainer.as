@@ -73,6 +73,7 @@ package {
 			profilePic.width = 30;
 			profilePic.height = 30;
 			this.drawnElements.addItem(profilePic);
+			user.drawnElements.addItem(profilePic);
 			this.parent.addChild(profilePic);
 			
 			var name_lbl:Label = new Label();
@@ -80,6 +81,7 @@ package {
 			name_lbl.move(this.x + x - name_lbl.width/2 - OFFSET, this.y + y + 22 - OFFSET);
 			name_lbl.setStyle("textAlign", "center");
 			this.drawnElements.addItem(name_lbl);
+			user.drawnElements.addItem(name_lbl);
 			this.parent.addChild(name_lbl);
 		}
 		
@@ -89,7 +91,7 @@ package {
 				drawUser(items.getItemAt(i) as User, 0, 0);
 			} else if (items.length > 1) {
 				var theta = 0.0;
-				var delta = 360.0 / items.length;
+				var delta = (360.0 / items.length) * Math.PI/180;
 				for(var i:int = 0; i < items.length; i++) {
 					drawPolarUser(items.getItemAt(i) as User, theta);
 					theta += delta;
