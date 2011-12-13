@@ -2,7 +2,7 @@
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
 					   xmlns:s="library://ns.adobe.com/flex/spark" 
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
-					   width="1200" height="800" creationComplete="windowedapplication1_creationCompleteHandler(event)" xmlns:controls="controls.*" xmlns:local="*" width.loggedout="1200" height.loggedout="800">
+					   width="1080" height="720" creationComplete="windowedapplication1_creationCompleteHandler(event)" xmlns:controls="controls.*" xmlns:local="*">
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
@@ -109,26 +109,26 @@
 					circleArea.removeChildAt(0);
 				}
 				
-				var CENTER_X = circleArea.width / 2 - 250;
-				var CENTER_Y = circleArea.height / 2 - 180;
+				var CENTER_X = circleArea.width / 2 - 220;
+				var CENTER_Y = circleArea.height / 2 - 160;
 				trace(circleArea.width+" "+CENTER_X+" "+circleArea.height+" "+CENTER_Y);
 				
-				noMutualsCircle = new CircleContainer(CENTER_X, CENTER_Y, 360, 0xFFFFFF, 0xFFFFFF);
+				noMutualsCircle = new CircleContainer(CENTER_X, CENTER_Y, 260, 0xFFFFFF, 0xFFFFFF);
 				circleArea.addChild(noMutualsCircle);
 				noMutualsCircle.addAll(noMutuals);
 				noMutualsCircle.drawItems();
 				
-				outerCircle = new CircleContainer(CENTER_X, CENTER_Y, 290);
+				outerCircle = new CircleContainer(CENTER_X, CENTER_Y, 220);
 				circleArea.addChild(outerCircle);
 				outerCircle.addAll(outer);
 				outerCircle.drawItems();
 				
-				innerCircle = new CircleContainer(CENTER_X, CENTER_Y, 190);
+				innerCircle = new CircleContainer(CENTER_X, CENTER_Y, 150);
 				circleArea.addChild(innerCircle);
 				innerCircle.addAll(inner);
 				innerCircle.drawItems();
 				
-				friendCircle = new CircleContainer(CENTER_X, CENTER_Y, 100);
+				friendCircle = new CircleContainer(CENTER_X, CENTER_Y, 80);
 				circleArea.addChild(friendCircle);
 				friendCircle.addAll(friends);
 				friendCircle.drawItems();
@@ -136,16 +136,16 @@
 				// adding pic to center
 				var profilePic:Image = new Image();
 				profilePic.source = "http://graph.facebook.com/"+USER_ID+"/picture";
-				profilePic.x = circleArea.width/2 - 25;
+				profilePic.x = circleArea.width/2 - 50;
 				profilePic.y = circleArea.height/2 - 60;
 				circleArea.addChild(profilePic);
 				
 				var myName:spark.components.Label = new spark.components.Label();
 				myName.text = USER_NAME.replace(" ", "\n");
-				myName.x = circleArea.width/2 - 25;
+				myName.x = circleArea.width/2 - 50;
 				myName.y = circleArea.height/2;
 				myName.setStyle("fontFamily", "Helvetica Neue");
-				myName.setStyle("fontSize", 16);
+				myName.setStyle("fontSize", 14);
 				myName.setStyle("textAlign", "center");
 				circleArea.addChild(myName);
 				
@@ -307,7 +307,7 @@
 	<s:Label includeIn="loggedout" color="#AAAAAA" fontFamily="Helvetica Neue Light"
 			 fontSize="12" text="Please login to Facebook." horizontalCenter="0" verticalCenter="-14"/>
 	
-	<s:TextInput includeIn="loggedin" y="10" right="20" width="692" color="#DDDDDD" id="searchbox"
+	<s:TextInput includeIn="loggedin" y="10" right="20" width="907" color="#DDDDDD" id="searchbox"
 				 fontFamily="Helvetica Neue Light" fontSize="32" text="Who do you want to find?" click="searchboxClick(event)" keyDown="conductSearch(event)"/>
 	<mx:Box y="18" right="40" horizontalAlign="center" verticalAlign="middle" includeIn="loggedin">
 		<controls:Spinner id="spinner" tickColor="#cccccc" visible="false"/>
@@ -367,11 +367,11 @@
 			
 		</mx:Canvas>
 	</s:Group>
-	<mx:Canvas id="circleArea" width="1000" height="700" x="220" y="100" includeIn="loggedin">
+	<mx:Canvas id="circleArea" width="820" height="600" x="220" y="100" includeIn="loggedin">
 		
 
 	</mx:Canvas>
-	<s:Button id="nextResultsButton" label=">>" click="nextResultHandler(event)" x="780" y="60" width="50" includeIn="loggedin" visible="false">
+	<s:Button id="nextResultsButton" label=">>" click="nextResultHandler(event)" x="1000" y="60" width="50" includeIn="loggedin" visible="false">
 		
 	</s:Button>
 </s:WindowedApplication>

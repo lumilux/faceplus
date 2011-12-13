@@ -1,5 +1,9 @@
 package {
 	import flash.display.*;
+	import flash.events.MouseEvent;
+	import flash.net.URLLoader;
+	import flash.net.URLRequest;
+	import flash.net.navigateToURL;
 	
 	import mx.collections.*;
 	import mx.containers.Canvas;
@@ -17,6 +21,8 @@ package {
 		[Bindable]
 		private var items:ArrayList;
 		private var drawnElements:ArrayList;
+		
+		private var myURL:String;
 		
 		public function CircleContainer(x:int, y:int, radius:int, color:uint = 0xEEEEEE, borderCol:uint = 0x6666FF) {
 			super();
@@ -80,9 +86,15 @@ package {
 			name_lbl.text = user.name.replace(" ", "\n");
 			name_lbl.move(this.x + x - name_lbl.width/2 - OFFSET, this.y + y + 22 - OFFSET);
 			name_lbl.setStyle("textAlign", "center");
+			name_lbl.setStyle("fontSize", "10");
 			this.drawnElements.addItem(name_lbl);
 			user.drawnElements.addItem(name_lbl);
 			this.parent.addChild(name_lbl);
+			
+			profilePic.addEventListener(MouseEvent.CLICK, function(event) {
+				var url:URLRequest = new URLRequest("http://www.facebook.com/"+user.id);
+				navigateToURL(url, "_blank");
+			});
 		}
 		
 		public function drawItems() {
