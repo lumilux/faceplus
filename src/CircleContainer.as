@@ -1,5 +1,5 @@
 package {
-	import flash.display.Shape;
+	import flash.display.*;
 	
 	import mx.collections.*;
 	import mx.containers.Canvas;
@@ -16,6 +16,7 @@ package {
 		private var borderColor:uint;
 		[Bindable]
 		private var items:ArrayList;
+		private var drawnElements:ArrayList;
 		
 		public function CircleContainer(x:int, y:int, radius:int, color:uint = 0xEEEEEE, borderCol:uint = 0x6666FF) {
 			super();
@@ -25,6 +26,7 @@ package {
 			this.cColor = color;
 			this.borderColor = borderCol;
 			items = new ArrayList();
+			drawnElements = new ArrayList();
 			//items.addEventListener(CollectionEvent.COLLECTION_CHANGE, itemsChangeListener);
 			this.draw();
 		}
@@ -33,8 +35,15 @@ package {
 			items.addItem(item);
 		}
 		
+		public function addAll(coll:IList) {
+			items.addAll(coll);
+		}
+		
 		public function clearItems() {
 			items.removeAll();
+			for each(var elem:DisplayObject in drawnElements) {
+				this.parent.removeChild(elem);
+			}
 		}
 		
 		public function setColor(newcolor:uint) {
@@ -60,6 +69,7 @@ package {
 			var name_lbl:Label = new Label();
 			name_lbl.text = user.name.replace(" ", "\n");
 			name_lbl.move(this.x + x, this.y + y);
+			this.drawnElements.addItem(name_lbl);
 			this.parent.addChild(name_lbl);
 		}
 		

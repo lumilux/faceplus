@@ -2,7 +2,7 @@
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
 					   xmlns:s="library://ns.adobe.com/flex/spark" 
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
-					   width="860" height="600" creationComplete="windowedapplication1_creationCompleteHandler(event)" xmlns:controls="controls.*" xmlns:local="*">
+					   width="860" height="600" creationComplete="windowedapplication1_creationCompleteHandler(event)" xmlns:controls="controls.*" xmlns:local="*" width.loggedout="1200" height.loggedout="800">
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
@@ -25,8 +25,8 @@
 			var innerCircle:CircleContainer;
 			var friendCircle:CircleContainer;
 			
-			var CENTER_X = 140;
-			var CENTER_Y = 120;
+			var CENTER_X = 200;
+			var CENTER_Y = 150;
 			
 			// dummy function for testing
 			protected function dummyLogin(event:MouseEvent):void {
@@ -114,30 +114,22 @@
 				
 				noMutualsCircle = new CircleContainer(CENTER_X, CENTER_Y, 240, 0xFFFFFF, 0xFFFFFF);
 				circleArea.addChild(noMutualsCircle);
-				for(var i:int = 0; i < noMutuals.length; i++) {
-					noMutualsCircle.addItem(noMutuals.getItemAt(i));
-				}
+				noMutualsCircle.addAll(noMutuals);
 				noMutualsCircle.drawItems();
 				
 				outerCircle = new CircleContainer(CENTER_X, CENTER_Y, 190);
 				circleArea.addChild(outerCircle);
-				for(var i:int = 0; i < outer.length; i++) {
-					outerCircle.addItem(outer.getItemAt(i));
-				}
+				outerCircle.addAll(outer);
 				outerCircle.drawItems();
 				
 				innerCircle = new CircleContainer(CENTER_X, CENTER_Y, 130);
 				circleArea.addChild(innerCircle);
-				for(var i:int = 0; i < inner.length; i++) {
-					innerCircle.addItem(inner.getItemAt(i));
-				}
+				innerCircle.addAll(inner);
 				innerCircle.drawItems();
 				
 				friendCircle = new CircleContainer(CENTER_X, CENTER_Y, 70);
 				circleArea.addChild(friendCircle);
-				for(var i:int = 0; i < friends.length; i++) {
-					friendCircle.addItem(friends.getItemAt(i));
-				}
+				friendCircle.addAll(friends);
 				friendCircle.drawItems();
 				
 				// adding pic to center
@@ -315,21 +307,21 @@
 		<s:State name="loggedout"/>
 		<s:State name="loggedin"/>
 	</s:states>
-	<s:Button id="loginoutBtn" right="10" label="Log In" skinClass="skins.FBLogoutButtonSkin" 
+	<s:Button id="loginoutBtn" label="Log In" skinClass="skins.FBLogoutButtonSkin" 
 			  right.loggedin="10" bottom.loggedin="10" label.loggedin="Log Out"
 			  skinClass.loggedin="skins.FBLogoutButtonSkin"
-			  right.loggedout="385" top.loggedout="349" label.loggedout="Log In"
+			  label.loggedout="Log In"
 			  click.loggedout="login(event)" click.loggedin="logout(event)" 
-			  skinClass.loggedout="skins.FBLoginButtonSkin"/>
+			  skinClass.loggedout="skins.FBLoginButtonSkin" verticalCenter.loggedout="-41" horizontalCenter.loggedout="0"/>
 	<s:Label x="20" y="20"
 			 color="#3B5998" fontFamily="Verdana" fontSize="36"
 			 fontWeight="bold" text="face"/>
 	<s:Label color="#666666" fontFamily="Verdana" fontSize="30" text="+"
 			 x="104" y="22"/>
-	<s:Label includeIn="loggedout" x="190" y="272" color="#888888" fontFamily="Helvetica Neue Light"
-			 fontSize="36" text="You are currently not logged in."/>
-	<s:Label includeIn="loggedout" x="363" y="379" color="#AAAAAA" fontFamily="Helvetica Neue Light"
-			 fontSize="12" text="Please login to Facebook."/>
+	<s:Label includeIn="loggedout" color="#888888" fontFamily="Helvetica Neue Light"
+			 fontSize="36" text="You are currently not logged in." horizontalCenter="0" verticalCenter="-107"/>
+	<s:Label includeIn="loggedout" color="#AAAAAA" fontFamily="Helvetica Neue Light"
+			 fontSize="12" text="Please login to Facebook." horizontalCenter="0" verticalCenter="-14"/>
 	
 	<s:TextInput includeIn="loggedin" y="10" right="20" width="692" color="#DDDDDD" id="searchbox"
 				 fontFamily="Helvetica Neue Light" fontSize="32" text="Who do you want to find?" click="searchboxClick(event)" keyDown="conductSearch(event)"/>
@@ -391,7 +383,7 @@
 			
 		</mx:Canvas>
 	</s:Group>
-	<mx:Canvas id="circleArea" width="620" height="500" x="200" y="60" includeIn="loggedin">
+	<mx:Canvas id="circleArea" width="800" height="700" x="220" y="100" includeIn="loggedin">
 		
 
 	</mx:Canvas>
